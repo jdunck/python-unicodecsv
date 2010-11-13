@@ -5,7 +5,7 @@ from csv import *
 def _stringify(s, encoding):
     if type(s)==unicode:
         return s.encode(encoding)
-    elif type(s) != str:
+    elif type(s) not in [float, int]:
         s=str(s)
     return s
 

@@ -5,6 +5,8 @@ from csv import *
 def _stringify(s, encoding):
     if type(s)==unicode:
         return s.encode(encoding)
+    elif isinstance(s, (int , float)):
+        pass #let csv.QUOTE_NONNUMERIC do its thing.
     elif type(s) != str:
         s=str(s)
     return s

@@ -2,6 +2,10 @@
 import csv
 from csv import *
 
+#http://semver.org/
+VERSION = (0, 8, 0)
+__version__ = ".".join(map(str,VERSION))
+
 def _stringify(s, encoding):
     if type(s)==unicode:
         return s.encode(encoding)

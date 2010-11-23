@@ -2,7 +2,7 @@
 
 from setuptools import setup, find_packages
 
-version = '1.0.0'
+version = __import__('unicodecsv').__version__
 
 setup(
     name='unicodecsv',

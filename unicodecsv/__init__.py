@@ -91,6 +91,8 @@ class DictReader(csv.DictReader):
     def __init__(self, csvfile, fieldnames=None, restkey=None, restval=None, dialect='excel', encoding='utf-8', *args, **kwds):
         self.restkey = restkey
         self.encoding = encoding
+        self._fieldnames = fieldnames
+        #csv.py uses a private variable for this.
         self.reader = csv.DictReader(csvfile, fieldnames, restkey, restval, dialect, *args, **kwds)
     def next(self):
         d = self.reader.next()

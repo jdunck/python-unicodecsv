@@ -7,11 +7,13 @@ VERSION = (0, 8, 0)
 __version__ = ".".join(map(str,VERSION))
 
 def _stringify(s, encoding):
-    if type(s)==unicode:
+    if s is None:
+        return None
+    elif isinstance(s, unicode):
         return s.encode(encoding)
     elif isinstance(s, (int , float)):
         pass #let csv.QUOTE_NONNUMERIC do its thing.
-    elif type(s) != str:
+    elif not isinstance(s, str):
         s=str(s)
     return s
 

@@ -58,7 +58,7 @@ class UnicodeReader(object):
         return self
 reader = UnicodeReader
 
-class DictWriter(csv.DictWriter):
+class UnicodeDictWriter(csv.DictWriter):
     """
     >>> from cStringIO import StringIO
     >>> f = StringIO()
@@ -74,11 +74,17 @@ class DictWriter(csv.DictWriter):
     True
     >>> r.next() == {'a':u'é', 'r':[u"î"]}
     """
-    def __init__(self, csvfile, fieldnames, restval='', extrasaction='raise', dialect='excel', encoding='utf-8', *args, **kwds):
+    def __init__(self, csvfile, fieldnames=None, restval='', extrasaction='raise', dialect='excel', encoding='utf-8', *args, **kwds):
         self.fieldnames = fieldnames
         self.encoding = encoding
         self.restval = restval
         self.writer = csv.DictWriter(csvfile, fieldnames, restval, extrasaction, dialect, *args, **kwds)
+
+    def writeheader(self):
+        fieldnames = _stringify_list(fieldnames, self.encoding)
+        header = dict(zip(self.fieldnames, self.fieldnames))
+        self.writerow(header)
+
     def writerow(self, d):
         for fieldname in self.fieldnames:
             if fieldname in d:
@@ -87,13 +93,46 @@ class DictWriter(csv.DictWriter):
                 d[fieldname] = _stringify(self.restval, self.encoding)
         self.writer.writerow(d)
 
-class DictReader(csv.DictReader):
+class UnicodeDictReader(csv.DictReader):
+    """
+    >>> from cStringIO import StringIO
+    >>> f = StringIO()
+    >>> w = DictWriter(f, fieldnames=['name', 'place'])
+    >>> w.writerow({'name':'Cary Grant', 'place': 'hollywood'})
+    >>> w.writerow({'name': 'Nathan Brillstone', 'place':u'øLand'})
+    >>> w.writerow({'name'::u'Willam ø. Unicoder', u'éSpandland'})
+    >>> f.seek(0)
+    >>> r = DictReader(f, fieldnames)
+    >>> r.next() == {'a':u'1', 'r':[u"î"]}
+    True
+    >>> r.next() == {'a':u'1', 'r':[u"ø"]}
+    True
+    >>> r.next() == {'a':u'é', 'r':[u"î"]}
+    """
+
+    @property
+    def fieldnames(self):
+        if self._fieldnames is None:
+            try:
+                self._fieldnames = self.reader.next()
+                print 'FieldNames:%s' % self._fieldnames
+            except StopIteration:
+                pass
+        self.line_num = self.reader.line_num
+        return self._fieldnames
+
+    @fieldnames.setter
+    def fieldnames(self, value):
+        self._fieldnames = value
+
     def __init__(self, csvfile, fieldnames=None, restkey=None, restval=None, dialect='excel', encoding='utf-8', *args, **kwds):
+
         self.restkey = restkey
         self.encoding = encoding
         self._fieldnames = fieldnames
         #csv.py uses a private variable for this.
         self.reader = csv.DictReader(csvfile, fieldnames, restkey, restval, dialect, *args, **kwds)
+
     def next(self):
         d = self.reader.next()
         for k, v in d.items():

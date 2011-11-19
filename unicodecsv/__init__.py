@@ -110,8 +110,7 @@ class UnicodeDictReader(csv.DictReader):
     >>> r.next() == {'a':u'é', 'r':[u"î"]}
     """
 
-    @property
-    def fieldnames(self):
+    def _get_fieldnames(self):
         if self._fieldnames is None:
             try:
                 self._fieldnames = self.reader.next()
@@ -121,9 +120,10 @@ class UnicodeDictReader(csv.DictReader):
         self.line_num = self.reader.line_num
         return self._fieldnames
 
-    @fieldnames.setter
-    def fieldnames(self, value):
+    def _set_fieldnames(self, value):
         self._fieldnames = value
+
+    fieldnames = property(_get_fieldnames, _set_fieldnames)
 
     def __init__(self, csvfile, fieldnames=None, restkey=None, restval=None, dialect='excel', encoding='utf-8', *args, **kwds):
 

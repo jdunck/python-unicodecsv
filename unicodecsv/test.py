@@ -7,7 +7,6 @@ import unittest2 as unittest
 from StringIO import StringIO
 import tempfile
 import unicodecsv as csv
-import io
 
 class Test_Csv(unittest.TestCase):
     """
@@ -249,25 +248,6 @@ class Test_Csv(unittest.TestCase):
         self.assertRaises(ValueError, self._read_test,
                           ['abc,3'], [[]],
                           quoting=csv.QUOTE_NONNUMERIC)
-
-    def test_read_bigfield(self):
-        # This exercises the buffer realloc functionality and field size
-        # limits.
-        limit = csv.field_size_limit()
-        try:
-            size = 50000
-            bigstring = 'X' * size
-            bigline = '%s,%s' % (bigstring, bigstring)
-            self._read_test([bigline], [[bigstring, bigstring]])
-            csv.field_size_limit(size)
-            self._read_test([bigline], [[bigstring, bigstring]])
-            self.assertEqual(csv.field_size_limit(), size)
-            csv.field_size_limit(size-1)
-            self.assertRaises(csv.Error, self._read_test, [bigline], [])
-            self.assertRaises(TypeError, csv.field_size_limit, None)
-            self.assertRaises(TypeError, csv.field_size_limit, 1, None)
-        finally:
-            csv.field_size_limit(limit)
 
     def test_read_linenum(self):
         for r in (csv.UnicodeReader(['line,1', 'line,2', 'line,3']),
@@ -592,9 +572,8 @@ class TestDictFields(unittest.TestCase):
     ### "long" means the row is longer than the number of fieldnames
     ### "short" means there are fewer elements in the row than fieldnames
     def test_write_simple_dict(self):
-        import pdb; pdb.set_trace()
         fd, name = tempfile.mkstemp()
-        fileobj = io.open(fd, 'w+b')
+        fileobj = open(name, 'w+b')
         try:
             writer = csv.UnicodeDictWriter(fileobj, fieldnames = ["f1", "f2", "f3"])
             writer.writeheader()
@@ -661,7 +640,7 @@ class TestDictFields(unittest.TestCase):
             f.write("f1,f2,f3\r\n1,2,abc\r\n")
             f.seek(0)
             reader = csv.UnicodeDictReader(f)
-            first = next(reader)
+            first = reader.next()
             for row in itertools.chain([first], reader):
                 self.assertEqual(reader.fieldnames, ["f1", "f2", "f3"])
                 self.assertEqual(row, {"f1": '1', "f2": '2', "f3": 'abc'})

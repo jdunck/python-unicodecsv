@@ -12,5 +12,7 @@ setup(
     author='Jeremy Dunck',
     url='https://github.com/jdunck/python-unicodecsv',
     packages=find_packages(),
+    tests_require=['unittest2>=0.5.1'],
+    test_suite='runtests.get_suite',
     )
 

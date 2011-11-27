@@ -55,13 +55,23 @@ class UnicodeWriter(object):
 writer = UnicodeWriter
 
 class UnicodeReader(object):
-    def __init__(self, f, dialect=csv.excel, encoding="utf-8", *args, **kwds):
-        self.reader = csv.reader(f, dialect, *args, **kwds)
+    def __init__(self, f, dialect=None, encoding="utf-8", **kwds):
+        format_params = ['delimiter', 'doublequote', 'escapechar', 'lineterminator', 'quotechar', 'quoting', 'skipinitialspace']
+        if dialect is None:
+            if not any([kwd_name in format_params for kwd_name in kwds.keys()]):
+                dialect = csv.excel
+        self.reader = csv.reader(f, dialect, **kwds)
         self.encoding = encoding
 
     def next(self):
         row = self.reader.next()
-        return [unicode(s, self.encoding) for s in row]
+        results = []
+        for value in row:
+            if isinstance(value, float):
+                results.append(value)
+            else:
+                results.append(unicode(value, self.encoding))
+        return results
 
     def __iter__(self):
         return self
@@ -92,7 +102,7 @@ class UnicodeDictWriter(csv.DictWriter):
     >>> print r.next() == {'a': u'\xc3\xa9', 'r': [u'\xc3\xae']}
     True
     """
-    def __init__(self, csvfile, fieldnames=None, restval='', extrasaction='raise', dialect='excel', encoding='utf-8', *args, **kwds):
+    def __init__(self, csvfile, fieldnames, restval='', extrasaction='raise', dialect='excel', encoding='utf-8', *args, **kwds):
         csv.DictWriter.__init__(self, csvfile, fieldnames, restval, extrasaction, dialect, *args, **kwds)
         self.writer = UnicodeWriter(csvfile, dialect, encoding=encoding, *args, **kwds)
 

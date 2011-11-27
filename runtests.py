@@ -9,4 +9,7 @@ def get_suite():
     return suite
 
 if __name__ == '__main__':
-    get_suite().run()
+    result = unittest2.TestResult()
+    get_suite().run(result)
+    for error in result.errors:
+        print error

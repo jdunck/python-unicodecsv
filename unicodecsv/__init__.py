@@ -1,10 +1,35 @@
 # -*- coding: utf-8 -*-
 import csv
-from csv import *
 
 #http://semver.org/
 VERSION = (0, 8, 0)
 __version__ = ".".join(map(str,VERSION))
+
+pass_throughs = [
+    'register_dialect',
+    'unregister_dialect',
+    'get_dialect',
+    'list_dialects',
+    'field_size_limit',
+    'Dialect',
+    'excel',
+    'excel_tab',
+    'Sniffer',
+    'QUOTE_ALL',
+    'QUOTE_MINIMAL',
+    'QUOTE_NONNUMERIC',
+    'QUOTE_NONE',
+    'Error'
+]
+__all__ = [
+    'reader',
+    'writer',
+    'DictReader',
+    'DictWriter',
+] + pass_throughs
+
+for prop in pass_throughs:
+    globals()[prop]=getattr(csv, prop)
 
 def _stringify(s, encoding):
     if s is None:
@@ -28,10 +53,10 @@ class UnicodeWriter(object):
     >>> import unicodecsv
     >>> from cStringIO import StringIO
     >>> f = StringIO()
-    >>> w = UnicodeWriter(f, encoding='utf-8')
+    >>> w = unicodecsv.writer(f, encoding='utf-8')
     >>> w.writerow((u'é', u'ñ'))
     >>> f.seek(0)
-    >>> r = UnicodeReader(f, encoding='utf-8')
+    >>> r = unicodecsv.reader(f, encoding='utf-8')
     >>> row = r.next()
     >>> row[0] == u'é'
     True
@@ -85,16 +110,16 @@ class UnicodeReader(object):
         return self.reader.line_num
 reader = UnicodeReader
 
-class UnicodeDictWriter(csv.DictWriter):
+class DictWriter(csv.DictWriter):
     """
     >>> from cStringIO import StringIO
     >>> f = StringIO()
-    >>> w = UnicodeDictWriter(f, ['a', 'b'], restval=u'î')
+    >>> w = DictWriter(f, ['a', 'b'], restval=u'î')
     >>> w.writerow({'a':'1'})
     >>> w.writerow({'a':'1', 'b':u'ø'})
     >>> w.writerow({'a':u'é'})
     >>> f.seek(0)
-    >>> r = UnicodeDictReader(f, fieldnames=['a'], restkey='r')
+    >>> r = DictReader(f, fieldnames=['a'], restkey='r')
     >>> print r.next() == {'a': u'1', 'r': [u'î']}
     True
     >>> print r.next() == {'a': u'1', 'r': [u'\xc3\xb8']}
@@ -110,16 +135,16 @@ class UnicodeDictWriter(csv.DictWriter):
         header = dict(zip(self.fieldnames, self.fieldnames))
         self.writerow(header)
 
-class UnicodeDictReader(csv.DictReader):
+class DictReader(csv.DictReader):
     """
     >>> from cStringIO import StringIO
     >>> f = StringIO()
-    >>> w = UnicodeDictWriter(f, fieldnames=['name', 'place'])
+    >>> w = DictWriter(f, fieldnames=['name', 'place'])
     >>> w.writerow({'name': 'Cary Grant', 'place': 'hollywood'})
     >>> w.writerow({'name': 'Nathan Brillstone', 'place': u'øLand'})
     >>> w.writerow({'name': u'Willam ø. Unicoder', 'place': u'éSpandland'})
     >>> f.seek(0)
-    >>> r = UnicodeDictReader(f, fieldnames=['name', 'place'])
+    >>> r = DictReader(f, fieldnames=['name', 'place'])
     >>> print r.next() == {'name': 'Cary Grant', 'place': 'hollywood'}
     True
     >>> print r.next() == {'name': 'Nathan Brillstone', 'place': u'øLand'}

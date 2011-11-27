@@ -34,11 +34,11 @@ for prop in pass_throughs:
 def _stringify(s, encoding):
     if s is None:
         return ''
-    if type(s)==unicode:
+    if isinstance(s, unicode):
         return s.encode(encoding)
     elif isinstance(s, (int , float)):
         pass #let csv.QUOTE_NONNUMERIC do its thing.
-    elif type(s) != str:
+    elif not isinstance(s, str):
         s=str(s)
     return s
 
@@ -47,6 +47,15 @@ def _stringify_list(l, encoding):
         return [_stringify(s, encoding) for s in iter(l)]
     except TypeError:
         raise csv.Error()
+
+def _unicodify(s, encoding):
+    if s is None:
+        return None
+    if isinstance(s, (unicode, int, float)):
+        return s
+    elif isinstance(s, str):
+        return s.decode(encoding)
+    return s
 
 class UnicodeWriter(object):
     """
@@ -114,24 +123,26 @@ class DictWriter(csv.DictWriter):
     """
     >>> from cStringIO import StringIO
     >>> f = StringIO()
-    >>> w = DictWriter(f, ['a', 'b'], restval=u'î')
-    >>> w.writerow({'a':'1'})
-    >>> w.writerow({'a':'1', 'b':u'ø'})
-    >>> w.writerow({'a':u'é'})
+    >>> w = DictWriter(f, ['a', u'ñ', 'b'], restval=u'î')
+    >>> w.writerow({'a':'1', u'ñ':'2'})
+    >>> w.writerow({'a':'1', u'ñ':'2', 'b':u'ø'})
+    >>> w.writerow({'a':u'é', u'ñ':'2'})
     >>> f.seek(0)
-    >>> r = DictReader(f, fieldnames=['a'], restkey='r')
-    >>> print r.next() == {'a': u'1', 'r': [u'î']}
+    >>> r = DictReader(f, fieldnames=['a', u'ñ'], restkey='r')
+    >>> r.next() == {'a': u'1', u'ñ':'2', 'r': [u'î']}
     True
-    >>> print r.next() == {'a': u'1', 'r': [u'\xc3\xb8']}
+    >>> r.next() == {'a': u'1', u'ñ':'2', 'r': [u'\xc3\xb8']}
     True
-    >>> print r.next() == {'a': u'\xc3\xa9', 'r': [u'\xc3\xae']}
+    >>> r.next() == {'a': u'\xc3\xa9', u'ñ':'2', 'r': [u'\xc3\xae']}
     True
     """
     def __init__(self, csvfile, fieldnames, restval='', extrasaction='raise', dialect='excel', encoding='utf-8', *args, **kwds):
+        self.encoding = encoding
         csv.DictWriter.__init__(self, csvfile, fieldnames, restval, extrasaction, dialect, *args, **kwds)
         self.writer = UnicodeWriter(csvfile, dialect, encoding=encoding, *args, **kwds)
 
     def writeheader(self):
+        fieldnames = _stringify_list(self.fieldnames, self.encoding)
         header = dict(zip(self.fieldnames, self.fieldnames))
         self.writerow(header)
 
@@ -153,5 +164,14 @@ class DictReader(csv.DictReader):
     True
     """
     def __init__(self, csvfile, fieldnames=None, restkey=None, restval=None, dialect='excel', encoding='utf-8', *args, **kwds):
+        if fieldnames is not None:
+            fieldnames = _stringify_list(fieldnames, encoding)
         csv.DictReader.__init__(self, csvfile, fieldnames, restkey, restval, dialect, *args, **kwds)
         self.reader = UnicodeReader(csvfile, dialect, encoding=encoding, *args, **kwds)
+
+    def next(self):
+        row = csv.DictReader.next(self)
+        result = {}
+        for key, value in row.items():
+            result[_unicodify(key, self.reader.encoding)] = value
+        return result

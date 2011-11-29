@@ -45,8 +45,8 @@ def _stringify(s, encoding):
 def _stringify_list(l, encoding):
     try:
         return [_stringify(s, encoding) for s in iter(l)]
-    except TypeError:
-        raise csv.Error()
+    except TypeError, e:
+        raise csv.Error(str(e))
 
 def _unicodify(s, encoding):
     if s is None:
@@ -168,6 +168,10 @@ class DictReader(csv.DictReader):
             fieldnames = _stringify_list(fieldnames, encoding)
         csv.DictReader.__init__(self, csvfile, fieldnames, restkey, restval, dialect, *args, **kwds)
         self.reader = UnicodeReader(csvfile, dialect, encoding=encoding, *args, **kwds)
+        if fieldnames is None and not hasattr(csv.DictReader, 'fieldnames'):
+            # Python 2.5 fieldnames workaround. (http://bugs.python.org/issue3436)
+            reader = UnicodeReader(csvfile, dialect, encoding=encoding, *args, **kwds)
+            self.fieldnames = _stringify_list(reader.next(), reader.encoding)
 
     def next(self):
         row = csv.DictReader.next(self)

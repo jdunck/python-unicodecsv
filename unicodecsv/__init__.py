@@ -2,7 +2,7 @@
 import csv
 
 #http://semver.org/
-VERSION = (0, 8, 0)
+VERSION = (0, 9, 0)
 __version__ = ".".join(map(str,VERSION))
 
 pass_throughs = [

@@ -2,3 +2,4 @@
 dist
 unicodecsv.egg-info
 unittest2*.egg
+build

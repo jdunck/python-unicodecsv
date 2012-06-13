@@ -818,3 +818,18 @@ class TestUnicode(unittest.TestCase):
                                          u"Marc André Lemburg",
                                          u"Guido van Rossum",
                                          u"François Pinard"]])
+
+
+class TestUnicodeErrors(unittest.TestCase):
+    def test_encode_error(self):
+        fd = StringIO()
+        writer = csv.writer(fd, encoding='cp1252', errors='xmlcharrefreplace')
+        writer.writerow(['hello', unichr(2603)])
+        self.assertEqual(fd.getvalue(), 'hello,&#2603;\r\n')
+
+    def test_encode_error_dictwriter(self):
+        fd = StringIO()
+        dw = csv.DictWriter(fd, ['col1'], encoding='cp1252', errors='xmlcharrefreplace')
+        dw.writerow({'col1': unichr(2604)})
+        self.assertEqual(fd.getvalue(), '&#2604;\r\n')
+

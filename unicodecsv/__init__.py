@@ -31,20 +31,20 @@ __all__ = [
 for prop in pass_throughs:
     globals()[prop]=getattr(csv, prop)
 
-def _stringify(s, encoding):
+def _stringify(s, encoding, errors):
     if s is None:
         return ''
     if isinstance(s, unicode):
-        return s.encode(encoding)
+        return s.encode(encoding, errors)
     elif isinstance(s, (int , float)):
         pass #let csv.QUOTE_NONNUMERIC do its thing.
     elif not isinstance(s, str):
         s=str(s)
     return s
 
-def _stringify_list(l, encoding):
+def _stringify_list(l, encoding, errors='strict'):
     try:
-        return [_stringify(s, encoding) for s in iter(l)]
+        return [_stringify(s, encoding, errors) for s in iter(l)]
     except TypeError, e:
         raise csv.Error(str(e))
 
@@ -72,12 +72,13 @@ class UnicodeWriter(object):
     >>> row[1] == u'ñ'
     True
     """
-    def __init__(self, f, dialect=csv.excel, encoding="utf-8", *args, **kwds):
+    def __init__(self, f, dialect=csv.excel, encoding="utf-8", errors='strict', *args, **kwds):
         self.encoding = encoding
         self.writer = csv.writer(f, dialect, *args, **kwds)
+        self.encoding_errors = errors
 
     def writerow(self, row):
-        self.writer.writerow(_stringify_list(row, self.encoding))
+        self.writer.writerow(_stringify_list(row, self.encoding, self.encoding_errors))
 
     def writerows(self, rows):
         for row in rows:
@@ -136,13 +137,14 @@ class DictWriter(csv.DictWriter):
     >>> r.next() == {'a': u'\xc3\xa9', u'ñ':'2', 'r': [u'\xc3\xae']}
     True
     """
-    def __init__(self, csvfile, fieldnames, restval='', extrasaction='raise', dialect='excel', encoding='utf-8', *args, **kwds):
+    def __init__(self, csvfile, fieldnames, restval='', extrasaction='raise', dialect='excel', encoding='utf-8', errors='strict', *args, **kwds):
         self.encoding = encoding
         csv.DictWriter.__init__(self, csvfile, fieldnames, restval, extrasaction, dialect, *args, **kwds)
-        self.writer = UnicodeWriter(csvfile, dialect, encoding=encoding, *args, **kwds)
+        self.writer = UnicodeWriter(csvfile, dialect, encoding=encoding, errors=errors, *args, **kwds)
+        self.encoding_errors = errors
 
     def writeheader(self):
-        fieldnames = _stringify_list(self.fieldnames, self.encoding)
+        fieldnames = _stringify_list(self.fieldnames, self.encoding, self.encoding_errors)
         header = dict(zip(self.fieldnames, self.fieldnames))
         self.writerow(header)
 

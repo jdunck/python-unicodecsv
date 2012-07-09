@@ -3,6 +3,7 @@
 # csv package unit tests
 
 import os
+import sys
 import unittest2 as unittest
 from StringIO import StringIO
 import tempfile
@@ -766,7 +767,10 @@ class TestArrayWrites(unittest.TestCase):
         try:
             writer = csv.writer(fileobj, dialect="excel")
             writer.writerow(a)
-            expected = ",".join([str(i) for i in a])+"\r\n"
+            float_repr = str
+            if sys.version_info >= (2, 7):
+                float_repr = repr
+            expected = ",".join([float_repr(i) for i in a])+"\r\n"
             fileobj.seek(0)
             self.assertEqual(fileobj.read(), expected)
         finally:
@@ -782,7 +786,10 @@ class TestArrayWrites(unittest.TestCase):
         try:
             writer = csv.writer(fileobj, dialect="excel")
             writer.writerow(a)
-            expected = ",".join([str(i) for i in a])+"\r\n"
+            float_repr = str
+            if sys.version_info >= (2, 7):
+                float_repr = repr
+            expected = ",".join([float_repr(i) for i in a])+"\r\n"
             fileobj.seek(0)
             self.assertEqual(fileobj.read(), expected)
         finally:

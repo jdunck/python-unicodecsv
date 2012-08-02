@@ -72,7 +72,8 @@ class UnicodeWriter(object):
     >>> row[1] == u'ñ'
     True
     """
-    def __init__(self, f, dialect=csv.excel, encoding="utf-8", errors='strict', *args, **kwds):
+    def __init__(self, f, dialect=csv.excel, encoding='utf-8', errors='strict',
+                 *args, **kwds):
         self.encoding = encoding
         self.writer = csv.writer(f, dialect, *args, **kwds)
         self.encoding_errors = errors
@@ -90,13 +91,15 @@ class UnicodeWriter(object):
 writer = UnicodeWriter
 
 class UnicodeReader(object):
-    def __init__(self, f, dialect=None, encoding="utf-8", **kwds):
+    def __init__(self, f, dialect=None, encoding='utf-8', errors='strict',
+                 **kwds):
         format_params = ['delimiter', 'doublequote', 'escapechar', 'lineterminator', 'quotechar', 'quoting', 'skipinitialspace']
         if dialect is None:
             if not any([kwd_name in format_params for kwd_name in kwds.keys()]):
                 dialect = csv.excel
         self.reader = csv.reader(f, dialect, **kwds)
         self.encoding = encoding
+        self.encoding_errors = errors
 
     def next(self):
         row = self.reader.next()
@@ -105,7 +108,8 @@ class UnicodeReader(object):
             if isinstance(value, float):
                 results.append(value)
             else:
-                results.append(unicode(value, self.encoding))
+                results.append(unicode(value, self.encoding,
+                                       self.encoding_errors))
         return results
 
     def __iter__(self):
@@ -165,11 +169,14 @@ class DictReader(csv.DictReader):
     >>> print r.next() == {'name': u'Willam ø. Unicoder', 'place': u'éSpandland'}
     True
     """
-    def __init__(self, csvfile, fieldnames=None, restkey=None, restval=None, dialect='excel', encoding='utf-8', *args, **kwds):
+    def __init__(self, csvfile, fieldnames=None, restkey=None, restval=None,
+                 dialect='excel', encoding='utf-8', errors='strict', *args,
+                 **kwds):
         if fieldnames is not None:
             fieldnames = _stringify_list(fieldnames, encoding)
         csv.DictReader.__init__(self, csvfile, fieldnames, restkey, restval, dialect, *args, **kwds)
-        self.reader = UnicodeReader(csvfile, dialect, encoding=encoding, *args, **kwds)
+        self.reader = UnicodeReader(csvfile, dialect, encoding=encoding,
+                                    errors=errors, *args, **kwds)
         if fieldnames is None and not hasattr(csv.DictReader, 'fieldnames'):
             # Python 2.5 fieldnames workaround. (http://bugs.python.org/issue3436)
             reader = UnicodeReader(csvfile, dialect, encoding=encoding, *args, **kwds)

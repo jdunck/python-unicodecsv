@@ -104,14 +104,11 @@ class UnicodeReader(object):
 
     def next(self):
         row = self.reader.next()
-        results = []
-        for value in row:
-            if isinstance(value, float):
-                results.append(value)
-            else:
-                results.append(unicode(value, self.encoding,
-                                       self.encoding_errors))
-        return results
+        encoding = self.encoding
+        encoding_errors = self.encoding_errors
+        float_ = float
+        return [(value if isinstance(value, float_) else
+                 unicode(value, encoding, encoding_errors)) for value in row]
 
     def __iter__(self):
         return self

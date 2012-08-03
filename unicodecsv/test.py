@@ -1,7 +1,8 @@
-# -*- coding: UTF8 -*-
+# -*- coding: utf-8 -*-
 # Copyright (C) 2001,2002 Python Software Foundation
 # csv package unit tests
 
+from codecs import EncodedFile
 import os
 import sys
 import unittest2 as unittest
@@ -814,12 +815,11 @@ class TestArrayWrites(unittest.TestCase):
 
 class TestUnicode(unittest.TestCase):
     def test_unicode_read(self):
-        import codecs
-        f = codecs.EncodedFile(StringIO("Martin von Löwis,"
-                                        "Marc André Lemburg,"
-                                        "Guido van Rossum,"
-                                        "François Pinard\r\n"),
-                               data_encoding='iso-8859-1')
+        f = EncodedFile(StringIO("Martin von Löwis,"
+                                 "Marc André Lemburg,"
+                                 "Guido van Rossum,"
+                                 "François Pinard\r\n"),
+                                 data_encoding='iso-8859-1')
         reader = csv.reader(f)
         self.assertEqual(list(reader), [[u"Martin von Löwis",
                                          u"Marc André Lemburg",
@@ -840,3 +840,15 @@ class TestUnicodeErrors(unittest.TestCase):
         dw.writerow({'col1': unichr(2604)})
         self.assertEqual(fd.getvalue(), '&#2604;\r\n')
 
+    def test_decode_error(self):
+        """Make sure the specified error-handling mode is obeyed on readers."""
+        file = EncodedFile(StringIO('Löwis,2,3'), data_encoding='iso-8859-1')
+        reader = csv.reader(file, encoding='ascii', errors='ignore')
+        self.assertEqual(list(reader)[0][0], 'Lwis')
+
+    def test_decode_error_dictreader(self):
+        """Make sure the error-handling mode is obeyed on DictReaders."""
+        file = EncodedFile(StringIO('name,height,weight\nLöwis,2,3'),
+                           data_encoding='iso-8859-1')
+        reader = csv.DictReader(file, encoding='ascii', errors='ignore')
+        self.assertEqual(list(reader)[0]['name'], 'Lwis')

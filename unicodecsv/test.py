@@ -768,7 +768,7 @@ class TestArrayWrites(unittest.TestCase):
             writer = csv.writer(fileobj, dialect="excel")
             writer.writerow(a)
             float_repr = str
-            if sys.version_info >= (2, 7):
+            if sys.version_info >= (2, 7, 3):
                 float_repr = repr
             expected = ",".join([float_repr(i) for i in a])+"\r\n"
             fileobj.seek(0)
@@ -787,7 +787,7 @@ class TestArrayWrites(unittest.TestCase):
             writer = csv.writer(fileobj, dialect="excel")
             writer.writerow(a)
             float_repr = str
-            if sys.version_info >= (2, 7):
+            if sys.version_info >= (2, 7, 3):
                 float_repr = repr
             expected = ",".join([float_repr(i) for i in a])+"\r\n"
             fileobj.seek(0)

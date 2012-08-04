@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import csv
+from itertools import izip
 
 #http://semver.org/
 VERSION = (0, 9, 1)
@@ -103,14 +104,12 @@ class UnicodeReader(object):
 
     def next(self):
         row = self.reader.next()
-        results = []
-        for value in row:
-            if isinstance(value, float):
-                results.append(value)
-            else:
-                results.append(unicode(value, self.encoding,
-                                       self.encoding_errors))
-        return results
+        encoding = self.encoding
+        encoding_errors = self.encoding_errors
+        float_ = float
+        unicode_ = unicode
+        return [(value if isinstance(value, float_) else
+                 unicode_(value, encoding, encoding_errors)) for value in row]
 
     def __iter__(self):
         return self
@@ -181,10 +180,15 @@ class DictReader(csv.DictReader):
             # Python 2.5 fieldnames workaround. (http://bugs.python.org/issue3436)
             reader = UnicodeReader(csvfile, dialect, encoding=encoding, *args, **kwds)
             self.fieldnames = _stringify_list(reader.next(), reader.encoding)
+        self.unicode_fieldnames = [_unicodify(f, encoding) for f in
+                                   self.fieldnames]
+        self.unicode_restkey = _unicodify(restkey, encoding)
 
     def next(self):
         row = csv.DictReader.next(self)
-        result = {}
-        for key, value in row.items():
-            result[_unicodify(key, self.reader.encoding)] = value
+        result = dict((uni_key, row[str_key]) for (str_key, uni_key) in
+                      izip(self.fieldnames, self.unicode_fieldnames))
+        rest = row.get(self.restkey)
+        if rest:
+            result[self.unicode_restkey] = rest
         return result

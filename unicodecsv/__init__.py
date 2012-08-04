@@ -107,8 +107,9 @@ class UnicodeReader(object):
         encoding = self.encoding
         encoding_errors = self.encoding_errors
         float_ = float
+        unicode_ = unicode
         return [(value if isinstance(value, float_) else
-                 unicode(value, encoding, encoding_errors)) for value in row]
+                 unicode_(value, encoding, encoding_errors)) for value in row]
 
     def __iter__(self):
         return self

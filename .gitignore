@@ -1,6 +1,10 @@
+.DS_Store
 .tox
-dist
-unicodecsv.egg-info
 unittest2*.egg
-build
 *.pyc
+.directory
+venv/
+*.log
+build/
+dist/
+*.egg-info/

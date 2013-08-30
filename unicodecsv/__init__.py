@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
 import csv
-from itertools import izip
+import sys
+
+try:
+    from itertools import izip
+except ImportError:
+    izip = zip
 
 #http://semver.org/
 VERSION = (0, 9, 4)
@@ -46,7 +51,8 @@ def _stringify(s, encoding, errors):
 def _stringify_list(l, encoding, errors='strict'):
     try:
         return [_stringify(s, encoding, errors) for s in iter(l)]
-    except TypeError, e:
+    except TypeError:
+        _, e, _ = sys.exc_info()
         raise csv.Error(str(e))
 
 def _unicodify(s, encoding):

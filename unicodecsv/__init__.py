@@ -147,7 +147,6 @@ class DictWriter(csv.DictWriter):
         self.encoding_errors = errors
 
     def writeheader(self):
-        fieldnames = _stringify_list(self.fieldnames, self.encoding, self.encoding_errors)
         header = dict(zip(self.fieldnames, self.fieldnames))
         self.writerow(header)
 

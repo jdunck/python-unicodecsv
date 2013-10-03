@@ -16,7 +16,7 @@ You can work around it by encoding everything just before calling write (or just
    >>> from cStringIO import StringIO
    >>> f = StringIO()
    >>> w = unicodecsv.writer(f, encoding='utf-8')
-   >>> w.writerow((u'é', u'ñ'))
+   >>> w.writerow([u'é', u'ñ'])
    >>> f.seek(0)
    >>> r = unicodecsv.reader(f, encoding='utf-8')
    >>> row = r.next()

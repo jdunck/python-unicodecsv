@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import csv
-import sys
 
 try:
     from itertools import izip
@@ -51,8 +50,7 @@ def _stringify(s, encoding, errors):
 def _stringify_list(l, encoding, errors='strict'):
     try:
         return [_stringify(s, encoding, errors) for s in iter(l)]
-    except TypeError:
-        _, e, _ = sys.exc_info()
+    except TypeError as e:
         raise csv.Error(str(e))
 
 def _unicodify(s, encoding):

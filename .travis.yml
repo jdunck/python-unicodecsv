@@ -5,3 +5,5 @@ python:
     - "3.2"
     - "3.3"
     - "pypy"
+install: echo
+script: python setup.py test 

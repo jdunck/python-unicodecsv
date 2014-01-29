@@ -5,8 +5,7 @@
 from codecs import EncodedFile
 import os
 import sys
-import unittest2 as unittest
-from StringIO import StringIO
+from test_deps import unittest, StringIO
 import tempfile
 import unicodecsv as csv
 
@@ -825,10 +824,8 @@ class TestUnicode(unittest.TestCase):
                                  "François Pinard\r\n"),
                                  data_encoding='iso-8859-1')
         reader = csv.reader(f)
-        self.assertEqual(list(reader), [[u"Martin von Löwis",
-                                         u"Marc André Lemburg",
-                                         u"Guido van Rossum",
-                                         u"François Pinard"]])
+        lst = ["Martin von Löwis", "Marc André Lemburg", "Guido van Rossum", "François Pinard"]
+        self.assertEqual(list(reader), [[i.decode('utf8') for i in lst]])
 
 
 class TestUnicodeErrors(unittest.TestCase):

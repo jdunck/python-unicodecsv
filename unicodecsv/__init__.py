@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 import csv
-from itertools import izip
 from contextlib import contextmanager
+try:
+    from itertools import izip
+except ImportError:
+    izip = zip
 
 
 #http://semver.org/
-VERSION = (0, 9, 4)
+VERSION = (0, 10, 1)
 __version__ = ".".join(map(str,VERSION))
 
 pass_throughs = [
@@ -48,7 +51,7 @@ def _stringify(s, encoding, errors):
 def _stringify_list(l, encoding, errors='strict'):
     try:
         return [_stringify(s, encoding, errors) for s in iter(l)]
-    except TypeError, e:
+    except TypeError as e:
         raise csv.Error(str(e))
 
 def _unicodify(s, encoding):

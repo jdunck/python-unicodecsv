@@ -10,6 +10,10 @@ from StringIO import StringIO
 import tempfile
 import unicodecsv as csv
 
+# pypy and cpython differ under which exception is raised under some circumstances
+# e.g. whether a module is written in C or not.
+py_compat_exc = (TypeError, AttributeError)
+
 class Test_Csv(unittest.TestCase):
     """
     Test the underlying C csv parser in ways that are not appropriate
@@ -17,21 +21,21 @@ class Test_Csv(unittest.TestCase):
     in TestDialectRegistry.
     """
     def _test_arg_valid(self, ctor, arg):
-        self.assertRaises(TypeError, ctor)
-        self.assertRaises(TypeError, ctor, None)
-        self.assertRaises(TypeError, ctor, arg, bad_attr = 0)
-        self.assertRaises(TypeError, ctor, arg, delimiter = 0)
-        self.assertRaises(TypeError, ctor, arg, delimiter = 'XX')
+        self.assertRaises(py_compat_exc, ctor)
+        self.assertRaises(py_compat_exc, ctor, None)
+        self.assertRaises(py_compat_exc, ctor, arg, bad_attr = 0)
+        self.assertRaises(py_compat_exc, ctor, arg, delimiter = 0)
+        self.assertRaises(py_compat_exc, ctor, arg, delimiter = 'XX')
         self.assertRaises(csv.Error, ctor, arg, 'foo')
-        self.assertRaises(TypeError, ctor, arg, delimiter=None)
-        self.assertRaises(TypeError, ctor, arg, delimiter=1)
-        self.assertRaises(TypeError, ctor, arg, quotechar=1)
-        self.assertRaises(TypeError, ctor, arg, lineterminator=None)
-        self.assertRaises(TypeError, ctor, arg, lineterminator=1)
-        self.assertRaises(TypeError, ctor, arg, quoting=None)
-        self.assertRaises(TypeError, ctor, arg,
+        self.assertRaises(py_compat_exc, ctor, arg, delimiter=None)
+        self.assertRaises(py_compat_exc, ctor, arg, delimiter=1)
+        self.assertRaises(py_compat_exc, ctor, arg, quotechar=1)
+        self.assertRaises(py_compat_exc, ctor, arg, lineterminator=None)
+        self.assertRaises(py_compat_exc, ctor, arg, lineterminator=1)
+        self.assertRaises(py_compat_exc, ctor, arg, quoting=None)
+        self.assertRaises(py_compat_exc, ctor, arg,
                           quoting=csv.QUOTE_ALL, quotechar='')
-        self.assertRaises(TypeError, ctor, arg,
+        self.assertRaises(py_compat_exc, ctor, arg,
                           quoting=csv.QUOTE_ALL, quotechar=None)
 
     def test_reader_arg_valid(self):
@@ -52,10 +56,10 @@ class Test_Csv(unittest.TestCase):
         self.assertEqual(obj.dialect.skipinitialspace, False)
         self.assertEqual(obj.dialect.strict, False)
         # Try deleting or changing attributes (they are read-only)
-        self.assertRaises(TypeError, delattr, obj.dialect, 'delimiter')
-        self.assertRaises(TypeError, setattr, obj.dialect, 'delimiter', ':')
-        self.assertRaises(AttributeError, delattr, obj.dialect, 'quoting')
-        self.assertRaises(AttributeError, setattr, obj.dialect,
+        self.assertRaises(py_compat_exc, delattr, obj.dialect, 'delimiter')
+        self.assertRaises(py_compat_exc, setattr, obj.dialect, 'delimiter', ':')
+        self.assertRaises(py_compat_exc, delattr, obj.dialect, 'quoting')
+        self.assertRaises(py_compat_exc, setattr, obj.dialect,
                           'quoting', None)
 
     def test_reader_attrs(self):

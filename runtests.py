@@ -1,12 +1,13 @@
 import doctest
 from six import print_
-from unicodecsv.test_deps import unittest
+from unicodecsv.test_deps import unittest, old
 
 
 def get_suite():
     loader = unittest.TestLoader()
     suite = loader.discover('unicodecsv')
-    suite.addTest(doctest.DocTestSuite('unicodecsv'))
+    if old:
+        suite.addTest(doctest.DocTestSuite('unicodecsv.two'))
     return suite
 
 

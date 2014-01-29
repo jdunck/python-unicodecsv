@@ -5,7 +5,7 @@
 from codecs import EncodedFile
 import os
 import sys
-from test_deps import unittest, StringIO
+from test_deps import unittest, StringIO, letters
 import tempfile
 import unicodecsv as csv
 
@@ -801,8 +801,8 @@ class TestArrayWrites(unittest.TestCase):
             os.unlink(name)
 
     def test_char_write(self):
-        import array, string
-        a = array.array('c', string.letters)
+        import array
+        a = array.array('c', letters)
         fd, name = tempfile.mkstemp()
         fileobj = os.fdopen(fd, "w+b")
         try:

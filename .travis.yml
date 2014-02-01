@@ -7,3 +7,8 @@ python:
     - "pypy"
 install: echo
 script: python setup.py test 
+
+# whitelist
+branches:
+  only:
+    - python3_support

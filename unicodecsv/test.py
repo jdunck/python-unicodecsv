@@ -5,14 +5,15 @@
 from codecs import EncodedFile
 import os
 import sys
-import unittest2 as unittest
-from StringIO import StringIO
+from test_deps import unittest, StringIO, letters, python3_skip
 import tempfile
 import unicodecsv as csv
+
 
 # pypy and cpython differ under which exception is raised under some circumstances
 # e.g. whether a module is written in C or not.
 py_compat_exc = (TypeError, AttributeError)
+
 
 class Test_Csv(unittest.TestCase):
     """
@@ -132,6 +133,7 @@ class Test_Csv(unittest.TestCase):
             fileobj.close()
             os.unlink(name)
 
+    @python3_skip
     def test_write_arg_valid(self):
         self.assertRaises(csv.Error, self._write_test, None, '')
         self._write_test((), '')
@@ -151,12 +153,14 @@ class Test_Csv(unittest.TestCase):
                 raise IOError
         self.assertRaises(IOError, self._write_test, [BadItem()], '')
 
+    @python3_skip
     def test_write_bigfield(self):
         # This exercises the buffer realloc functionality
         bigstring = 'X' * 50000
         self._write_test([bigstring,bigstring], '%s,%s' % \
                          (bigstring, bigstring))
 
+    @python3_skip
     def test_write_quoting(self):
         self._write_test(['a',1,'p,q'], 'a,1,"p,q"')
         self.assertRaises(csv.Error,
@@ -171,7 +175,8 @@ class Test_Csv(unittest.TestCase):
                          quoting = csv.QUOTE_ALL)
         self._write_test(['a\nb',1], '"a\nb","1"',
                          quoting = csv.QUOTE_ALL)
-
+    
+    @python3_skip
     def test_write_escape(self):
         self._write_test(['a',1,'p,q'], 'a,1,"p,q"',
                          escapechar='\\')
@@ -191,6 +196,7 @@ class Test_Csv(unittest.TestCase):
         self._write_test(['a',1,'p,q'], 'a,1,p\\,q',
                          escapechar='\\', quoting = csv.QUOTE_NONE)
 
+    @python3_skip
     def test_writerows(self):
         class BrokenFile:
             def write(self, buf):
@@ -254,7 +260,8 @@ class Test_Csv(unittest.TestCase):
         self.assertRaises(ValueError, self._read_test,
                           ['abc,3'], [[]],
                           quoting=csv.QUOTE_NONNUMERIC)
-
+    
+    @python3_skip
     def test_read_linenum(self):
         for r in (csv.reader(['line,1', 'line,2', 'line,3']),
                   csv.DictReader(['line,1', 'line,2', 'line,3'],
@@ -269,6 +276,7 @@ class Test_Csv(unittest.TestCase):
             self.assertRaises(StopIteration, r.next)
             self.assertEqual(r.line_num, 3)
 
+    @python3_skip
     def test_roundtrip_quoteed_newlines(self):
         fd, name = tempfile.mkstemp()
         fileobj = os.fdopen(fd, "w+b")
@@ -283,6 +291,7 @@ class Test_Csv(unittest.TestCase):
         finally:
             fileobj.close()
             os.unlink(name)
+
 
 class TestDialectRegistry(unittest.TestCase):
     def test_registry_badargs(self):
@@ -331,6 +340,7 @@ class TestDialectRegistry(unittest.TestCase):
             delimiter = "\t"
         self.assertRaises(csv.Error, myexceltsv)
 
+    @python3_skip
     def test_space_dialect(self):
         class space(csv.excel):
             delimiter = " "
@@ -349,6 +359,7 @@ class TestDialectRegistry(unittest.TestCase):
             fileobj.close()
             os.unlink(name)
 
+    @python3_skip
     def test_dialect_apply(self):
         class testA(csv.excel):
             delimiter = "\t"
@@ -451,6 +462,8 @@ class TestCsvBase(unittest.TestCase):
             fileobj.close()
             os.unlink(name)
 
+
+@python3_skip
 class TestDialectExcel(TestCsvBase):
     dialect = 'excel'
 
@@ -548,10 +561,13 @@ hammer and saw"
     def test_newlines(self):
         self.writerAssertEqual([[1, 2, 'a\nbc', 3, 4]], '1,2,"a\nbc",3,4\r\n')
 
+
 class EscapedExcel(csv.excel):
     quoting = csv.QUOTE_NONE
     escapechar = '\\'
 
+
+@python3_skip
 class TestEscapedExcel(TestCsvBase):
     dialect = EscapedExcel()
 
@@ -561,10 +577,13 @@ class TestEscapedExcel(TestCsvBase):
     def test_read_escape_fieldsep(self):
         self.readerAssertEqual('abc\\,def\r\n', [['abc,def']])
 
+
 class QuotedEscapedExcel(csv.excel):
     quoting = csv.QUOTE_NONNUMERIC
     escapechar = '\\'
 
+
+@python3_skip
 class TestQuotedEscapedExcel(TestCsvBase):
     dialect = QuotedEscapedExcel()
 
@@ -574,6 +593,8 @@ class TestQuotedEscapedExcel(TestCsvBase):
     def test_read_escape_fieldsep(self):
         self.readerAssertEqual('"abc\\,def"\r\n', [['abc,def']])
 
+
+@python3_skip
 class TestDictFields(unittest.TestCase):
     ### "long" means the row is longer than the number of fieldnames
     ### "short" means there are fewer elements in the row than fieldnames
@@ -593,9 +614,6 @@ class TestDictFields(unittest.TestCase):
             fileobj.close()
             os.unlink(name)
 
-    def test_write_no_fields(self):
-        fileobj = StringIO()
-        self.assertRaises(TypeError, csv.DictWriter, fileobj)
 
     def test_read_dict_fields(self):
         fd, name = tempfile.mkstemp()
@@ -745,6 +763,14 @@ class TestDictFields(unittest.TestCase):
         self.assertEqual(reader.next(), {"1": '1', "2": '2', "3": 'abc',
                                          "4": '4', "5": '5', "6": '6'})
 
+
+class TestDictReaderPython2And3(unittest.TestCase):
+    def test_write_no_fields(self):
+        fileobj = StringIO()
+        self.assertRaises(TypeError, csv.DictWriter, fileobj)
+
+
+@python3_skip
 class TestArrayWrites(unittest.TestCase):
     def test_int_write(self):
         import array
@@ -802,8 +828,8 @@ class TestArrayWrites(unittest.TestCase):
             os.unlink(name)
 
     def test_char_write(self):
-        import array, string
-        a = array.array('c', string.letters)
+        import array
+        a = array.array('c', letters)
         fd, name = tempfile.mkstemp()
         fileobj = os.fdopen(fd, "w+b")
         try:
@@ -817,6 +843,7 @@ class TestArrayWrites(unittest.TestCase):
             os.unlink(name)
 
 
+@python3_skip
 class TestUnicode(unittest.TestCase):
     def test_unicode_read(self):
         f = EncodedFile(StringIO("Martin von Löwis,"
@@ -825,34 +852,33 @@ class TestUnicode(unittest.TestCase):
                                  "François Pinard\r\n"),
                                  data_encoding='iso-8859-1')
         reader = csv.reader(f)
-        self.assertEqual(list(reader), [[u"Martin von Löwis",
-                                         u"Marc André Lemburg",
-                                         u"Guido van Rossum",
-                                         u"François Pinard"]])
+        lst = ["Martin von Löwis", "Marc André Lemburg", "Guido van Rossum", "François Pinard"]
+        self.assertEqual(list(reader), [[i.decode('utf8') for i in lst]])
 
 
+@python3_skip
 class TestUnicodeErrors(unittest.TestCase):
     def test_encode_error(self):
         fd = StringIO()
         writer = csv.writer(fd, encoding='cp1252', errors='xmlcharrefreplace')
         writer.writerow(['hello', unichr(2603)])
         self.assertEqual(fd.getvalue(), 'hello,&#2603;\r\n')
-
     def test_encode_error_dictwriter(self):
         fd = StringIO()
         dw = csv.DictWriter(fd, ['col1'], encoding='cp1252', errors='xmlcharrefreplace')
         dw.writerow({'col1': unichr(2604)})
         self.assertEqual(fd.getvalue(), '&#2604;\r\n')
-
     def test_decode_error(self):
         """Make sure the specified error-handling mode is obeyed on readers."""
         file = EncodedFile(StringIO('Löwis,2,3'), data_encoding='iso-8859-1')
         reader = csv.reader(file, encoding='ascii', errors='ignore')
         self.assertEqual(list(reader)[0][0], 'Lwis')
-
     def test_decode_error_dictreader(self):
         """Make sure the error-handling mode is obeyed on DictReaders."""
         file = EncodedFile(StringIO('name,height,weight\nLöwis,2,3'),
                            data_encoding='iso-8859-1')
         reader = csv.DictReader(file, encoding='ascii', errors='ignore')
         self.assertEqual(list(reader)[0]['name'], 'Lwis')
+
+if __name__ == "__main__":
+    unittest.main()

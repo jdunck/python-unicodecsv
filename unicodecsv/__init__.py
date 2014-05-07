@@ -64,7 +64,10 @@ def _unicodify(s, encoding):
 class UnicodeWriter(object):
     """
     >>> import unicodecsv
-    >>> from cStringIO import StringIO
+    >>> try:
+    ...     from cStringIO import StringIO
+    ... except ImportError:
+    ...     from io import StringIO
     >>> f = StringIO()
     >>> w = unicodecsv.writer(f, encoding='utf-8')
     >>> w.writerow((u'é', u'ñ'))
@@ -128,7 +131,10 @@ reader = UnicodeReader
 
 class DictWriter(csv.DictWriter):
     """
-    >>> from cStringIO import StringIO
+    >>> try:
+    ...     from cStringIO import StringIO
+    ... except ImportError:
+    ...     from io import StringIO
     >>> f = StringIO()
     >>> w = DictWriter(f, ['a', u'ñ', 'b'], restval=u'î')
     >>> w.writerow({'a':'1', u'ñ':'2'})
@@ -156,7 +162,10 @@ class DictWriter(csv.DictWriter):
 
 class DictReader(csv.DictReader):
     """
-    >>> from cStringIO import StringIO
+    >>> try:
+    ...     from cStringIO import StringIO
+    ... except ImportError:
+    ...     from io import StringIO
     >>> f = StringIO()
     >>> w = DictWriter(f, fieldnames=['name', 'place'])
     >>> w.writerow({'name': 'Cary Grant', 'place': 'hollywood'})
@@ -164,11 +173,11 @@ class DictReader(csv.DictReader):
     >>> w.writerow({'name': u'Willam ø. Unicoder', 'place': u'éSpandland'})
     >>> f.seek(0)
     >>> r = DictReader(f, fieldnames=['name', 'place'])
-    >>> print r.next() == {'name': 'Cary Grant', 'place': 'hollywood'}
+    >>> print(r.next() == {'name': 'Cary Grant', 'place': 'hollywood'})
     True
-    >>> print r.next() == {'name': 'Nathan Brillstone', 'place': u'øLand'}
+    >>> print(r.next() == {'name': 'Nathan Brillstone', 'place': u'øLand'})
     True
-    >>> print r.next() == {'name': u'Willam ø. Unicoder', 'place': u'éSpandland'}
+    >>> print(r.next() == {'name': u'Willam ø. Unicoder', 'place': u'éSpandland'})
     True
     """
     def __init__(self, csvfile, fieldnames=None, restkey=None, restval=None,

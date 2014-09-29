@@ -83,7 +83,7 @@ class UnicodeWriter(object):
         self.encoding_errors = errors
 
     def writerow(self, row):
-        self.writer.writerow(_stringify_list(row, self.encoding, self.encoding_errors))
+        return self.writer.writerow(_stringify_list(row, self.encoding, self.encoding_errors))
 
     def writerows(self, rows):
         for row in rows:

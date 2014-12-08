@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import csv
+import csv, collections
 try:
     from itertools import izip
 except ImportError:
@@ -189,7 +189,7 @@ class DictReader(csv.DictReader):
 
     def next(self):
         row = csv.DictReader.next(self)
-        result = dict((uni_key, row[str_key]) for (str_key, uni_key) in
+        result = collections.OrderedDict((uni_key, row[str_key]) for (str_key, uni_key) in
                       izip(self.fieldnames, self.unicode_fieldnames))
         rest = row.get(self.restkey)
         if rest:

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import csv
+from decimal import Decimal
 
 #http://semver.org/
 VERSION = (0, 9, 0)
@@ -36,7 +37,7 @@ def _stringify(s, encoding):
         return ''
     if isinstance(s, unicode):
         return s.encode(encoding)
-    elif isinstance(s, (int , float)):
+    elif isinstance(s, (int , float, Decimal)):
         pass #let csv.QUOTE_NONNUMERIC do its thing.
     elif not isinstance(s, str):
         s=str(s)

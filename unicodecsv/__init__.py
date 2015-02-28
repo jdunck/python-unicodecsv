@@ -104,15 +104,19 @@ class UnicodeReader(object):
         self.reader = csv.reader(f, dialect, **kwds)
         self.encoding = encoding
         self.encoding_errors = errors
+        self._parse_numerics = bool(self.dialect.quoting & csv.QUOTE_NONNUMERIC)
 
     def next(self):
         row = self.reader.next()
         encoding = self.encoding
         encoding_errors = self.encoding_errors
-        float_ = float
         unicode_ = unicode
-        return [(value if isinstance(value, float_) else
-                 unicode_(value, encoding, encoding_errors)) for value in row]
+        if self._parse_numerics:
+            float_ = float
+            return [(value if isinstance(value, float_) else
+                     unicode_(value, encoding, encoding_errors)) for value in row]
+        else:
+            return [unicode_(value, encoding, encoding_errors) for value in row]
 
     def __iter__(self):
         return self

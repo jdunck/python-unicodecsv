@@ -7,7 +7,7 @@ except ImportError:
 
 #http://semver.org/
 VERSION = (0, 10, 1)
-__version__ = ".".join(map(str,VERSION))
+__version__ = ".".join(map(str, VERSION))
 
 pass_throughs = [
     'register_dialect',
@@ -33,24 +33,27 @@ __all__ = [
 ] + pass_throughs
 
 for prop in pass_throughs:
-    globals()[prop]=getattr(csv, prop)
+    globals()[prop] = getattr(csv, prop)
+
 
 def _stringify(s, encoding, errors):
     if s is None:
         return ''
     if isinstance(s, unicode):
         return s.encode(encoding, errors)
-    elif isinstance(s, (int , float)):
-        pass #let csv.QUOTE_NONNUMERIC do its thing.
+    elif isinstance(s, (int, float)):
+        pass  # let csv.QUOTE_NONNUMERIC do its thing.
     elif not isinstance(s, str):
-        s=str(s)
+        s = str(s)
     return s
+
 
 def _stringify_list(l, encoding, errors='strict'):
     try:
         return [_stringify(s, encoding, errors) for s in iter(l)]
     except TypeError as e:
         raise csv.Error(str(e))
+
 
 def _unicodify(s, encoding):
     if s is None:
@@ -60,6 +63,7 @@ def _unicodify(s, encoding):
     elif isinstance(s, str):
         return s.decode(encoding)
     return s
+
 
 class UnicodeWriter(object):
     """
@@ -87,12 +91,13 @@ class UnicodeWriter(object):
 
     def writerows(self, rows):
         for row in rows:
-          self.writerow(row)
+            self.writerow(row)
 
     @property
     def dialect(self):
         return self.writer.dialect
 writer = UnicodeWriter
+
 
 class UnicodeReader(object):
     def __init__(self, f, dialect=None, encoding='utf-8', errors='strict',
@@ -130,6 +135,7 @@ class UnicodeReader(object):
         return self.reader.line_num
 reader = UnicodeReader
 
+
 class DictWriter(csv.DictWriter):
     """
     >>> from cStringIO import StringIO
@@ -154,9 +160,10 @@ class DictWriter(csv.DictWriter):
         self.encoding_errors = errors
 
     def writeheader(self):
-        fieldnames = _stringify_list(self.fieldnames, self.encoding, self.encoding_errors)
+        _stringify_list(self.fieldnames, self.encoding, self.encoding_errors)
         header = dict(zip(self.fieldnames, self.fieldnames))
         self.writerow(header)
+
 
 class DictReader(csv.DictReader):
     """
@@ -185,8 +192,8 @@ class DictReader(csv.DictReader):
                                     errors=errors, *args, **kwds)
         if fieldnames is None and not hasattr(csv.DictReader, 'fieldnames'):
             # Python 2.5 fieldnames workaround. (http://bugs.python.org/issue3436)
-            reader = UnicodeReader(csvfile, dialect, encoding=encoding, *args, **kwds)
-            self.fieldnames = _stringify_list(reader.next(), reader.encoding)
+            unicodereader = UnicodeReader(csvfile, dialect, encoding=encoding, *args, **kwds)
+            self.fieldnames = _stringify_list(unicodereader.next(), unicodereader.encoding)
         self.unicode_fieldnames = [_unicodify(f, encoding) for f in
                                    self.fieldnames]
         self.unicode_restkey = _unicodify(restkey, encoding)

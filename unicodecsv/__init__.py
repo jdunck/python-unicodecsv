@@ -187,8 +187,11 @@ class DictReader(csv.DictReader):
             # Python 2.5 fieldnames workaround. (http://bugs.python.org/issue3436)
             reader = UnicodeReader(csvfile, dialect, encoding=encoding, *args, **kwds)
             self.fieldnames = _stringify_list(reader.next(), reader.encoding)
-        self.unicode_fieldnames = [_unicodify(f, encoding) for f in
-                                   self.fieldnames]
+        if self.fieldnames is not None:
+            self.unicode_fieldnames = [_unicodify(f, encoding) for f in
+                                       self.fieldnames]
+        else:
+            self.fieldnames = None
         self.unicode_restkey = _unicodify(restkey, encoding)
 
     def next(self):

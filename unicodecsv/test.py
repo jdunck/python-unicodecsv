@@ -745,6 +745,20 @@ class TestDictFields(unittest.TestCase):
         self.assertEqual(reader.next(), {"1": '1', "2": '2', "3": 'abc',
                                          "4": '4', "5": '5', "6": '6'})
 
+    def test_empty_file(self):
+        fd, name = tempfile.mkstemp()
+        f = os.fdopen(fd, "w+b")
+        try:
+            f.write("")
+            f.seek(0)
+            reader = csv.DictReader(f)
+            self.assertEqual(reader.fieldnames, None)
+            with self.assertRaises(StopIteration):
+                reader.next()
+        finally:
+            f.close()
+            os.unlink(name)
+
 class TestArrayWrites(unittest.TestCase):
     def test_int_write(self):
         import array

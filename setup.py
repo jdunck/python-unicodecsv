@@ -1,8 +1,15 @@
 #!/usr/bin/env python
 import os
+import sys
 from setuptools import setup, find_packages
 
 version = __import__('unicodecsv').__version__
+
+
+if sys.version_info[0] < 3:
+    tests_require = ['unittest2>=0.5.1']
+else:
+    tests_require = []
 
 setup(
     name='unicodecsv',
@@ -13,7 +20,7 @@ setup(
     author_email='jdunck@gmail.com',
     url='https://github.com/jdunck/python-unicodecsv',
     packages=find_packages(),
-    tests_require=['unittest2>=0.5.1'],
+    tests_require=tests_require,
     test_suite='runtests.get_suite',
     license='BSD License',
     classifiers=['Development Status :: 5 - Production/Stable',

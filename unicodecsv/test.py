@@ -5,8 +5,14 @@
 from codecs import EncodedFile
 import os
 import sys
-import unittest2 as unittest
-from StringIO import StringIO
+try:
+    import unittest2 as unittest
+except ImportError:
+    import unittest
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
 import tempfile
 import unicodecsv as csv
 
@@ -803,7 +809,11 @@ class TestArrayWrites(unittest.TestCase):
 
     def test_char_write(self):
         import array, string
-        a = array.array('c', string.letters)
+        letters = getattr(string, 'letters', string.ascii_letters)
+        try:
+            a = array.array('c', letters)
+        except ValueError:
+            a = array.array('u', letters)
         fd, name = tempfile.mkstemp()
         fileobj = os.fdopen(fd, "w+b")
         try:

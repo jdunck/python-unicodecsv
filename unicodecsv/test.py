@@ -745,6 +745,11 @@ class TestDictFields(unittest.TestCase):
         self.assertEqual(reader.next(), {"1": '1', "2": '2', "3": 'abc',
                                          "4": '4', "5": '5', "6": '6'})
 
+    def test_read_retain_order_of_columns(self):
+        reader = csv.DictReader(["1,2,3,4"],
+                                fieldnames="foo bar baz qux".split())
+        self.assertEqual(reader.next().keys(), ["foo", "bar", "baz", "qux"])
+
 class TestArrayWrites(unittest.TestCase):
     def test_int_write(self):
         import array

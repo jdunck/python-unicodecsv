@@ -155,7 +155,7 @@ class DictWriter(csv.DictWriter):
 
     def writeheader(self):
         fieldnames = _stringify_list(self.fieldnames, self.encoding, self.encoding_errors)
-        header = dict(zip(self.fieldnames, self.fieldnames))
+        header = dict(zip(fieldnames, fieldnames))
         self.writerow(header)
 
 class DictReader(csv.DictReader):

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import csv
+from contextlib import contextmanager
 try:
     from itertools import izip
 except ImportError:
@@ -199,3 +200,33 @@ class DictReader(csv.DictReader):
         if rest:
             result[self.unicode_restkey] = rest
         return result
+
+@contextmanager
+def ureader(path, *args, **kwargs):
+    """
+    >>> from unicodecsv import uwriter, ureader
+    >>> with uwriter('unicodecsv_test_tmpfile') as ucsv:
+    ...     ucsv.writerow([u'龜', '5'])
+    ... 
+    >>> with ureader('unicodecsv_test_tmpfile') as ucsv:
+    ...     assert ucsv.next() == [u'龜', '5']
+    ... 
+    >>> import os
+    >>> os.remove('unicodecsv_test_tmpfile')
+    """
+    with open(path, 'r') as myfile:
+        yield reader(myfile, *args, **kwargs)
+
+
+@contextmanager
+def uwriter(path, *args, **kwargs):
+    with open(path, 'w') as myfile:
+        yield writer(myfile, *args, **kwargs)
+
+
+def xcsv(path, *args, **kwargs):
+    # generator to iterate over the rows of a CSV file
+    with ureader(path, *args, **kwargs) as ur:
+        for row in ur:
+            yield row
+

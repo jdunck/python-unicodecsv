@@ -87,7 +87,7 @@ class UnicodeWriter(object):
 
     def writerows(self, rows):
         for row in rows:
-          self.writerow(row)
+            self.writerow(row)
 
     @property
     def dialect(self):

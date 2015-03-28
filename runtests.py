@@ -1,6 +1,7 @@
 import unittest2
 import doctest
 
+
 def get_suite():
     loader = unittest2.TestLoader()
     suite = loader.discover('unicodecsv')

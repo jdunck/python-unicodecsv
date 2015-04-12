@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-import csv
+import csv, numbers
 try:
     from itertools import izip
 except ImportError:
     izip = zip
 
 #http://semver.org/
-VERSION = (0, 10, 1)
+VERSION = (0, 11, 0)
 __version__ = ".".join(map(str,VERSION))
 
 pass_throughs = [
@@ -40,7 +40,7 @@ def _stringify(s, encoding, errors):
         return ''
     if isinstance(s, unicode):
         return s.encode(encoding, errors)
-    elif isinstance(s, (int , float)):
+    elif isinstance(s, numbers.Number):
         pass #let csv.QUOTE_NONNUMERIC do its thing.
     elif not isinstance(s, str):
         s=str(s)

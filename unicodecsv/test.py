@@ -8,7 +8,9 @@ import sys
 import unittest2 as unittest
 from StringIO import StringIO
 import tempfile
+
 import unicodecsv as csv
+import decimal
 
 # pypy and cpython differ under which exception is raised under some circumstances
 # e.g. whether a module is written in C or not.
@@ -171,6 +173,10 @@ class Test_Csv(unittest.TestCase):
                          quoting = csv.QUOTE_ALL)
         self._write_test(['a\nb',1], '"a\nb","1"',
                          quoting = csv.QUOTE_ALL)
+
+    def test_write_decimal(self):
+        self._write_test(['a', decimal.Decimal("1.1"), 'p,q'], '"a",1.1,"p,q"',
+                 quoting = csv.QUOTE_NONNUMERIC)
 
     def test_write_escape(self):
         self._write_test(['a',1,'p,q'], 'a,1,"p,q"',

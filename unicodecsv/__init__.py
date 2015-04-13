@@ -6,7 +6,7 @@ except ImportError:
     izip = zip
 
 #http://semver.org/
-VERSION = (0, 11, 1)
+VERSION = (0, 11, 2)
 __version__ = ".".join(map(str,VERSION))
 
 pass_throughs = [
@@ -154,8 +154,7 @@ class DictWriter(csv.DictWriter):
         self.encoding_errors = errors
 
     def writeheader(self):
-        fieldnames = _stringify_list(self.fieldnames, self.encoding, self.encoding_errors)
-        header = dict(zip(fieldnames, fieldnames))
+        header = dict(zip(self.fieldnames, self.fieldnames))
         self.writerow(header)
 
 class DictReader(csv.DictReader):

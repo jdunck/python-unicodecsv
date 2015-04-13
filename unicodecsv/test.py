@@ -599,6 +599,18 @@ class TestDictFields(unittest.TestCase):
             fileobj.close()
             os.unlink(name)
 
+    def test_write_unicode_header_dict(self):
+        fd, name = tempfile.mkstemp()
+        fileobj = open(name, 'w+b')
+        try:
+            writer = csv.DictWriter(fileobj, fieldnames = [u"ñ", u"ö"])
+            writer.writeheader()
+            fileobj.seek(0)
+            self.assertEqual(fileobj.readline().decode('utf-8'), u"ñ,ö\r\n")
+        finally:
+            fileobj.close()
+            os.unlink(name)        
+
     def test_write_no_fields(self):
         fileobj = StringIO()
         self.assertRaises(TypeError, csv.DictWriter, fileobj)

@@ -794,6 +794,9 @@ class TestDictFields(unittest.TestCase):
         self.assertEqual(reader.next(), {"1": '1', "2": '2', "3": 'abc',
                                          "4": '4', "5": '5', "6": '6'})
 
+    def test_empty_file(self):
+        csv.DictReader(StringIO())
+
 
 class TestArrayWrites(unittest.TestCase):
     def test_int_write(self):

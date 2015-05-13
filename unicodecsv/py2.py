@@ -205,8 +205,13 @@ class DictReader(csv.DictReader):
             reader = UnicodeReader(csvfile, dialect, encoding=encoding,
                                    *args, **kwds)
             self.fieldnames = _stringify_list(reader.next(), reader.encoding)
-        self.unicode_fieldnames = [_unicodify(f, encoding) for f in
-                                   self.fieldnames]
+
+        if self.fieldnames is not None:
+            self.unicode_fieldnames = [_unicodify(f, encoding) for f in
+                                       self.fieldnames]
+        else:
+            self.unicode_fieldnames = []
+
         self.unicode_restkey = _unicodify(restkey, encoding)
 
     def next(self):

@@ -8,7 +8,7 @@ setup(
     name='unicodecsv',
     version=version,
     description="Python2's stdlib csv module is nice, but it doesn't support unicode. This module is a drop-in replacement which *does*.",
-    long_description=open(os.path.join(os.path.dirname(__file__), 'README.rst'), 'r').read(),
+    long_description=open(os.path.join(os.path.dirname(__file__), 'README.rst'), 'rb').read().decode('utf-8'),
     author='Jeremy Dunck',
     author_email='jdunck@gmail.com',
     url='https://github.com/jdunck/python-unicodecsv',
@@ -20,9 +20,10 @@ setup(
                 'Intended Audience :: Developers',
                 'License :: OSI Approved :: BSD License',
                 'Natural Language :: English',
-                'Programming Language :: Python :: 2.5',
                 'Programming Language :: Python :: 2.6',
                 'Programming Language :: Python :: 2.7',
+                'Programming Language :: Python :: 3.3',
+                'Programming Language :: Python :: 3.4',
                 'Programming Language :: Python :: Implementation :: CPython',],
 )
 

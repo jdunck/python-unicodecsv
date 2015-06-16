@@ -11,6 +11,7 @@ def get_suite():
     loader = unittest2.TestLoader()
     suite = loader.discover(start_module)
     suite.addTest(doctest.DocTestSuite(start_module))
+    suite.addTest(doctest.DocFileSuite('README.rst', optionflags=doctest.ELLIPSIS))
 
     return suite
 

@@ -10,18 +10,17 @@ Python 2's csv module doesn't easily deal with unicode strings, leading to the d
 
 You can work around it by encoding everything just before calling write (or just after read), but why not add support to the serializer?
 
-::
+.. code-block:: pycon
 
-   >>> import unicodecsv
-   >>> from cStringIO import StringIO
-   >>> f = StringIO()
-   >>> w = unicodecsv.writer(f, encoding='utf-8')
-   >>> w.writerow((u'é', u'ñ'))
-   >>> f.seek(0)
-   >>> r = unicodecsv.reader(f, encoding='utf-8')
-   >>> row = r.next()
-   >>> print row[0], row[1]
-   é ñ
+   >>> import unicodecsv as csv
+   >>> from io import BytesIO
+   >>> f = BytesIO()
+   >>> w = csv.writer(f, encoding='utf-8')
+   >>> _ = w.writerow((u'é', u'ñ'))
+   >>> _ = f.seek(0)
+   >>> r = csv.reader(f, encoding='utf-8')
+   >>> next(r) == [u'é', u'ñ']
+   True
 
 Note that unicodecsv expects a bytestream, not unicode -- so there's no need to use `codecs.open` or similar wrappers.  Plain `open(..., 'rb')` will do.
 

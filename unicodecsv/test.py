@@ -336,7 +336,7 @@ class TestDialectRegistry(unittest.TestCase):
         expected_dialects.sort()
         csv.register_dialect(name, myexceltsv)
         try:
-            self.assertTrue(csv.get_dialect(name).delimiter, '\t')
+            self.assertEqual(csv.get_dialect(name).delimiter, '\t')
             got_dialects = csv.list_dialects()
             got_dialects.sort()
             self.assertEqual(expected_dialects, got_dialects)
@@ -347,8 +347,8 @@ class TestDialectRegistry(unittest.TestCase):
         name = 'fedcba'
         csv.register_dialect(name, delimiter=';')
         try:
-            self.assertTrue(csv.get_dialect(name).delimiter, '\t')
-            self.assertTrue(list(csv.reader([b'X;Y;Z'], name)), ['X', 'Y', 'Z'])
+            self.assertNotEqual(csv.get_dialect(name).delimiter, '\t')
+            self.assertEqual(list(csv.reader([b'X;Y;Z'], name)), [[u'X', u'Y', u'Z']])
         finally:
             csv.unregister_dialect(name)
 

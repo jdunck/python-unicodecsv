@@ -3,13 +3,14 @@ import unittest2
 import doctest
 
 def get_suite():
-    # no tests under python 3 since we simply defer to the vanilla module.
     if sys.version_info >= (3, 0):
-        return unittest2.TestSuite()
+        start_module = 'unicodecsv.py3'
+    else:
+        start_module = 'unicodecsv.py2'
 
     loader = unittest2.TestLoader()
-    suite = loader.discover('unicodecsv.py2')
-    suite.addTest(doctest.DocTestSuite('unicodecsv.py2'))
+    suite = loader.discover(start_module)
+    suite.addTest(doctest.DocTestSuite(start_module))
 
     return suite
 

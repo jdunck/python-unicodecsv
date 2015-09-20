@@ -22,3 +22,5 @@ You can work around it by encoding everything just before calling write (or just
    >>> row = r.next()
    >>> print row[0], row[1]
    é ñ
+
+Note that unicodecsv expects a bytestream, not unicode -- so there's no need to use `codecs.open` or similar wrappers.  Plain `open` will do.

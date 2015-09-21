@@ -147,7 +147,10 @@ class Test_Csv(unittest.TestCase):
             os.unlink(name)
 
     def test_write_arg_valid(self):
-        self.assertRaises(csv.Error, self._write_test, None, '')
+        import sys
+        pypy3 = hasattr(sys, 'pypy_version_info') and sys.version_info.major == 3
+
+        self.assertRaises(TypeError if pypy3 else csv.Error, self._write_test, None, '')
         self._write_test((), b'')
         self._write_test([None], b'""')
         self.assertRaises(csv.Error, self._write_test,

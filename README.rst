@@ -23,6 +23,3 @@ You can work around it by encoding everything just before calling write (or just
    True
 
 Note that unicodecsv expects a bytestream, not unicode -- so there's no need to use `codecs.open` or similar wrappers.  Plain `open(..., 'rb')` will do.
-
-(Version 0.13.0 is the last version to support python 2.6.  See c0b7655248c4249 for the breaking change.)
-

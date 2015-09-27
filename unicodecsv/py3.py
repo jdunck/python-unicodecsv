@@ -12,6 +12,8 @@ class _UnicodeWriteWrapper(object):
         self.errors = errors
 
     def write(self, string):
+        if type(string) == 'bytes':
+            return string
         return self.binary.write(string.encode(self.encoding, self.errors))
 
 

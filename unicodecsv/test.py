@@ -10,7 +10,7 @@ import sys
 import tempfile
 import unittest2 as unittest
 from codecs import EncodedFile
-from io import BytesIO
+from io import BytesIO, TextIOWrapper
 
 import unicodecsv as csv
 
@@ -926,3 +926,28 @@ class TestUnicodeErrors(unittest.TestCase):
                            data_encoding='iso-8859-1')
         reader = csv.DictReader(file, encoding='ascii', errors='ignore')
         self.assertEqual(list(reader)[0]['name'], 'Lwis')
+
+
+class TestPython3Fallback(unittest.TestCase):
+    """Fall back to the built-in version when no encoding is given in Python 3."""
+    if sys.version_info[0] == 2:
+        import unicodecsv as _csv
+    else:
+        import csv as _csv
+
+    def test_reader_fallback(self):
+        f = ['a', 'b', 'c']
+        self.assertEqual(type(csv.reader(f)), type(self._csv.reader(f)))
+
+    def test_writer_fallback(self):
+        f = TextIOWrapper(BytesIO())
+        self.assertEqual(type(csv.writer(f)), type(self._csv.writer(f)))
+
+    def test_dictreader_fallback(self):
+        f = ['a', 'b', 'c']
+        self.assertEqual(type(csv.DictReader(f).reader), type(self._csv.reader(f)))
+
+    def test_dictwriter_fallback(self):
+        f = TextIOWrapper(BytesIO())
+        actual = type(csv.DictWriter(f, fieldnames=['a', 'b', 'c']).writer)
+        self.assertEqual(actual, type(self._csv.writer(f)))

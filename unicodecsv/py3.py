@@ -16,7 +16,13 @@ class _UnicodeWriteWrapper(object):
 
 
 class UnicodeWriter(object):
-    def __init__(self, f, dialect=csv.excel, encoding='utf-8', errors='strict',
+    def __new__(cls, f, dialect=csv.excel, encoding=None, errors='strict',
+                *args, **kwds):
+        if encoding is None:
+            return csv.writer(f, dialect, *args, **kwds)
+        return super().__new__(cls)
+
+    def __init__(self, f, dialect=csv.excel, encoding=None, errors='strict',
                  *args, **kwds):
         if f is None:
             raise TypeError
@@ -36,7 +42,13 @@ class UnicodeWriter(object):
 
 
 class UnicodeReader(object):
-    def __init__(self, f, dialect=None, encoding='utf-8', errors='strict',
+    def __new__(cls, f, dialect=None, encoding=None, errors='strict',
+                **kwds):
+        if encoding is None:
+            return csv.reader(f, dialect, **kwds)
+        return super().__new__(cls)
+
+    def __init__(self, f, dialect=None, encoding=None, errors='strict',
                  **kwds):
 
         format_params = ['delimiter', 'doublequote', 'escapechar',
@@ -72,7 +84,7 @@ reader = UnicodeReader
 
 class DictWriter(csv.DictWriter):
     def __init__(self, csvfile, fieldnames, restval='',
-                 extrasaction='raise', dialect='excel', encoding='utf-8',
+                 extrasaction='raise', dialect='excel', encoding=None,
                  errors='strict', *args, **kwds):
         super().__init__(csvfile, fieldnames, restval,
                          extrasaction, dialect, *args, **kwds)
@@ -87,7 +99,7 @@ class DictWriter(csv.DictWriter):
 
 class DictReader(csv.DictReader):
     def __init__(self, csvfile, fieldnames=None, restkey=None, restval=None,
-                 dialect='excel', encoding='utf-8', errors='strict', *args,
+                 dialect='excel', encoding=None, errors='strict', *args,
                  **kwds):
         csv.DictReader.__init__(self, csvfile, fieldnames, restkey, restval,
                                 dialect, *args, **kwds)

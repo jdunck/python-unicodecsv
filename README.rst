@@ -1,7 +1,7 @@
 unicodecsv
 ==========
 
-The unicodecsv is a drop-in replacement for Python 2.7's csv module which supports unicode strings without a hassle.  Supported versions are python 2.7, 3.3, 3.4, 3.5, and pypy 2.4.0.
+The unicodecsv is a drop-in replacement for Python 2.7's csv module which supports unicode strings without a hassle.  Supported versions are python 2.6, 2.7, 3.3, 3.4, 3.5, and pypy 2.4.0.
 
 More fully
 ----------

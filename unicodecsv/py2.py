@@ -50,6 +50,13 @@ def _stringify_list(l, encoding, errors='strict'):
         raise csv.Error(str(e))
 
 
+def _encode_kwds(kwds, encoding, errors='strict'):
+    for k, v in kwds.items():
+            if k in ('delimiter', 'quotechar') and isinstance(v, unicode):
+                kwds[k] = v.encode(encoding, errors)
+    return kwds
+
+
 def _unicodify(s, encoding):
     if s is None:
         return None
@@ -78,8 +85,9 @@ class UnicodeWriter(object):
     def __init__(self, f, dialect=csv.excel, encoding='utf-8', errors='strict',
                  *args, **kwds):
         self.encoding = encoding
-        self.writer = csv.writer(f, dialect, *args, **kwds)
         self.encoding_errors = errors
+        kwds = _encode_kwds(kwds, encoding, errors)
+        self.writer = csv.writer(f, dialect, *args, **kwds)
 
     def writerow(self, row):
         return self.writer.writerow(
@@ -107,6 +115,7 @@ class UnicodeReader(object):
             if not any([kwd_name in format_params
                         for kwd_name in kwds.keys()]):
                 dialect = csv.excel
+        kwds = _encode_kwds(kwds, encoding, errors)
         self.reader = csv.reader(f, dialect, **kwds)
         self.encoding = encoding
         self.encoding_errors = errors
@@ -161,6 +170,7 @@ class DictWriter(csv.DictWriter):
                  extrasaction='raise', dialect='excel', encoding='utf-8',
                  errors='strict', *args, **kwds):
         self.encoding = encoding
+        kwds = _encode_kwds(kwds, encoding, errors)
         csv.DictWriter.__init__(self, csvfile, fieldnames, restval,
                                 extrasaction, dialect, *args, **kwds)
         self.writer = UnicodeWriter(csvfile, dialect, encoding=encoding,
@@ -194,6 +204,7 @@ class DictReader(csv.DictReader):
                  **kwds):
         if fieldnames is not None:
             fieldnames = _stringify_list(fieldnames, encoding)
+        kwds = _encode_kwds(kwds, encoding, errors)
         csv.DictReader.__init__(self, csvfile, fieldnames, restkey, restval,
                                 dialect, *args, **kwds)
         self.reader = UnicodeReader(csvfile, dialect, encoding=encoding,

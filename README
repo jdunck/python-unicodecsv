@@ -16,3 +16,13 @@ You can work around it by encoding everything just before calling write (or just
 >>> row = r.next()
 >>> print row[0], row[1]
 é ñ
+
+#Another way to implement without BytesIO
+#Assume any_list_1 and any_list_2 contains special characters in UTF-8
+import unicodecsv as csv
+
+with open(filename,"w") as f:
+    opWriter = csv.writer(f)
+    for i in range(0,10):
+    	opWriter.writerow( [ any_list_1[i], any_list_2[i] ] )
+    	

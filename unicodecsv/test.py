@@ -10,7 +10,7 @@ import sys
 import tempfile
 import unittest2 as unittest
 from codecs import EncodedFile
-from io import BytesIO
+from io import BytesIO, TextIOWrapper
 
 import unicodecsv as csv
 
@@ -137,7 +137,7 @@ class Test_Csv(unittest.TestCase):
         fd, name = tempfile.mkstemp()
         fileobj = os.fdopen(fd, "w+b")
         try:
-            writer = csv.writer(fileobj, **kwargs)
+            writer = csv.writer(fileobj, encoding='utf-8', **kwargs)
             writer.writerow(fields)
             fileobj.seek(0)
             self.assertEqual(fileobj.read(),
@@ -228,7 +228,7 @@ class Test_Csv(unittest.TestCase):
         fd, name = tempfile.mkstemp()
         fileobj = os.fdopen(fd, "w+b")
         try:
-            writer = csv.writer(fileobj)
+            writer = csv.writer(fileobj, encoding='utf-8')
             self.assertRaises(TypeError, writer.writerows, None)
             writer.writerows([['a', 'b'], ['c', 'd']])
             fileobj.seek(0)
@@ -238,7 +238,7 @@ class Test_Csv(unittest.TestCase):
             os.unlink(name)
 
     def _read_test(self, input, expect, **kwargs):
-        reader = csv.reader(input, **kwargs)
+        reader = csv.reader(input, encoding='utf-8', **kwargs)
         result = list(reader)
         self.assertEqual(result, expect)
 
@@ -284,9 +284,9 @@ class Test_Csv(unittest.TestCase):
                           quoting=csv.QUOTE_NONNUMERIC)
 
     def test_read_linenum(self):
-        for r in (csv.reader([b'line,1', b'line,2', b'line,3']),
+        for r in (csv.reader([b'line,1', b'line,2', b'line,3'], encoding='utf-8'),
                   csv.DictReader([b'line,1', b'line,2', b'line,3'],
-                                 fieldnames=['a', 'b', 'c'])):
+                                 fieldnames=['a', 'b', 'c'], encoding='utf-8')):
             self.assertEqual(r.line_num, 0)
             next(r)
             self.assertEqual(r.line_num, 1)
@@ -301,12 +301,12 @@ class Test_Csv(unittest.TestCase):
         fd, name = tempfile.mkstemp()
         fileobj = os.fdopen(fd, "w+b")
         try:
-            writer = csv.writer(fileobj)
+            writer = csv.writer(fileobj, encoding='utf-8')
             self.assertRaises(TypeError, writer.writerows, None)
             rows = [['a\nb', 'b'], ['c', 'x\r\nd']]
             writer.writerows(rows)
             fileobj.seek(0)
-            for i, row in enumerate(csv.reader(fileobj)):
+            for i, row in enumerate(csv.reader(fileobj, encoding='utf-8')):
                 self.assertEqual(row, rows[i])
         finally:
             fileobj.close()
@@ -351,7 +351,7 @@ class TestDialectRegistry(unittest.TestCase):
         csv.register_dialect(name, delimiter=';')
         try:
             self.assertNotEqual(csv.get_dialect(name).delimiter, '\t')
-            self.assertEqual(list(csv.reader([b'X;Y;Z'], name)), [[u'X', u'Y', u'Z']])
+            self.assertEqual(list(csv.reader([b'X;Y;Z'], name, encoding='utf-8')), [[u'X', u'Y', u'Z']])
         finally:
             csv.unregister_dialect(name)
 
@@ -371,7 +371,7 @@ class TestDialectRegistry(unittest.TestCase):
         try:
             fileobj.write(b"abc def\nc1ccccc1 benzene\n")
             fileobj.seek(0)
-            rdr = csv.reader(fileobj, dialect=space())
+            rdr = csv.reader(fileobj, dialect=space(), encoding='utf-8')
             self.assertEqual(next(rdr), ["abc", "def"])
             self.assertEqual(next(rdr), ["c1ccccc1", "benzene"])
         finally:
@@ -393,7 +393,7 @@ class TestDialectRegistry(unittest.TestCase):
             fd, name = tempfile.mkstemp()
             fileobj = os.fdopen(fd, "w+b")
             try:
-                writer = csv.writer(fileobj)
+                writer = csv.writer(fileobj, encoding='utf-8')
                 writer.writerow([1, 2, 3])
                 fileobj.seek(0)
                 self.assertEqual(fileobj.read(), b"1,2,3\r\n")
@@ -404,7 +404,7 @@ class TestDialectRegistry(unittest.TestCase):
             fd, name = tempfile.mkstemp()
             fileobj = os.fdopen(fd, "w+b")
             try:
-                writer = csv.writer(fileobj, testA)
+                writer = csv.writer(fileobj, testA, encoding='utf-8')
                 writer.writerow([1, 2, 3])
                 fileobj.seek(0)
                 self.assertEqual(fileobj.read(), b"1\t2\t3\r\n")
@@ -415,7 +415,7 @@ class TestDialectRegistry(unittest.TestCase):
             fd, name = tempfile.mkstemp()
             fileobj = os.fdopen(fd, "w+b")
             try:
-                writer = csv.writer(fileobj, dialect=testB())
+                writer = csv.writer(fileobj, dialect=testB(), encoding='utf-8')
                 writer.writerow([1, 2, 3])
                 fileobj.seek(0)
                 self.assertEqual(fileobj.read(), b"1:2:3\r\n")
@@ -426,7 +426,7 @@ class TestDialectRegistry(unittest.TestCase):
             fd, name = tempfile.mkstemp()
             fileobj = os.fdopen(fd, "w+b")
             try:
-                writer = csv.writer(fileobj, dialect='testC')
+                writer = csv.writer(fileobj, dialect='testC', encoding='utf-8')
                 writer.writerow([1, 2, 3])
                 fileobj.seek(0)
                 self.assertEqual(fileobj.read(), b"1|2|3\r\n")
@@ -437,7 +437,7 @@ class TestDialectRegistry(unittest.TestCase):
             fd, name = tempfile.mkstemp()
             fileobj = os.fdopen(fd, "w+b")
             try:
-                writer = csv.writer(fileobj, dialect=testA, delimiter=';')
+                writer = csv.writer(fileobj, dialect=testA, delimiter=';', encoding='utf-8')
                 writer.writerow([1, 2, 3])
                 fileobj.seek(0)
                 self.assertEqual(fileobj.read(), b"1;2;3\r\n")
@@ -464,7 +464,7 @@ class TestCsvBase(unittest.TestCase):
         try:
             fileobj.write(input)
             fileobj.seek(0)
-            reader = csv.reader(fileobj, dialect=self.dialect)
+            reader = csv.reader(fileobj, dialect=self.dialect, encoding='utf-8')
             fields = list(reader)
             self.assertEqual(fields, expected_result)
         finally:
@@ -475,7 +475,7 @@ class TestCsvBase(unittest.TestCase):
         fd, name = tempfile.mkstemp()
         fileobj = os.fdopen(fd, "w+b")
         try:
-            writer = csv.writer(fileobj, dialect=self.dialect)
+            writer = csv.writer(fileobj, dialect=self.dialect, encoding='utf-8')
             writer.writerows(input)
             fileobj.seek(0)
             self.assertEqual(fileobj.read(), expected_result)
@@ -624,7 +624,7 @@ class TestDictFields(unittest.TestCase):
         fd, name = tempfile.mkstemp()
         fileobj = open(name, 'w+b')
         try:
-            writer = csv.DictWriter(fileobj, fieldnames=["f1", "f2", "f3"])
+            writer = csv.DictWriter(fileobj, fieldnames=["f1", "f2", "f3"], encoding='utf-8')
             writer.writeheader()
             fileobj.seek(0)
             self.assertEqual(fileobj.readline(), b"f1,f2,f3\r\n")
@@ -640,7 +640,7 @@ class TestDictFields(unittest.TestCase):
         fd, name = tempfile.mkstemp()
         fileobj = open(name, 'w+b')
         try:
-            writer = csv.DictWriter(fileobj, fieldnames=[u"ñ", u"ö"])
+            writer = csv.DictWriter(fileobj, fieldnames=[u"ñ", u"ö"], encoding='utf-8')
             writer.writeheader()
             fileobj.seek(0)
             self.assertEqual(fileobj.readline().decode('utf-8'), u"ñ,ö\r\n")
@@ -659,7 +659,8 @@ class TestDictFields(unittest.TestCase):
             fileobj.write(b"1,2,abc\r\n")
             fileobj.seek(0)
             reader = csv.DictReader(fileobj,
-                                    fieldnames=["f1", "f2", "f3"])
+                                    fieldnames=["f1", "f2", "f3"],
+                                    encoding='utf-8')
             self.assertEqual(next(reader),
                              {"f1": '1', "f2": '2', "f3": 'abc'})
         finally:
@@ -672,7 +673,7 @@ class TestDictFields(unittest.TestCase):
         try:
             fileobj.write(b"f1,f2,f3\r\n1,2,abc\r\n")
             fileobj.seek(0)
-            reader = csv.DictReader(fileobj)
+            reader = csv.DictReader(fileobj, encoding='utf-8')
             self.assertEqual(reader.fieldnames,
                              ["f1", "f2", "f3"])
             self.assertEqual(next(reader),
@@ -689,7 +690,9 @@ class TestDictFields(unittest.TestCase):
         try:
             f.write(b"f1,f2,f3\r\n1,2,abc\r\n")
             f.seek(0)
-            reader = csv.DictReader(f, fieldnames=next(csv.reader(f)))
+            reader = csv.DictReader(
+                f, fieldnames=next(csv.reader(f, encoding='utf-8')),
+                encoding='utf-8')
             self.assertEqual(reader.fieldnames,
                              ["f1", "f2", "f3"])
             self.assertEqual(next(reader),
@@ -705,7 +708,7 @@ class TestDictFields(unittest.TestCase):
         try:
             f.write(b"f1,f2,f3\r\n1,2,abc\r\n")
             f.seek(0)
-            reader = csv.DictReader(f)
+            reader = csv.DictReader(f, encoding='utf-8')
             first = next(reader)
             for row in itertools.chain([first], reader):
                 self.assertEqual(reader.fieldnames, ["f1", "f2", "f3"])
@@ -721,7 +724,8 @@ class TestDictFields(unittest.TestCase):
             fileobj.write(b"1,2,abc,4,5,6\r\n")
             fileobj.seek(0)
             reader = csv.DictReader(fileobj,
-                                    fieldnames=["f1", "f2"])
+                                    fieldnames=["f1", "f2"],
+                                    encoding='utf-8')
             self.assertEqual(next(reader), {"f1": '1', "f2": '2',
                                              None: ["abc", "4", "5", "6"]})
         finally:
@@ -735,7 +739,8 @@ class TestDictFields(unittest.TestCase):
             fileobj.write(b"1,2,abc,4,5,6\r\n")
             fileobj.seek(0)
             reader = csv.DictReader(fileobj,
-                                    fieldnames=["f1", "f2"], restkey="_rest")
+                                    fieldnames=["f1", "f2"], restkey="_rest",
+                                    encoding='utf-8')
             self.assertEqual(next(reader), {"f1": '1', "f2": '2',
                                              "_rest": ["abc", "4", "5", "6"]})
         finally:
@@ -748,7 +753,7 @@ class TestDictFields(unittest.TestCase):
         try:
             fileobj.write(b"f1,f2\r\n1,2,abc,4,5,6\r\n")
             fileobj.seek(0)
-            reader = csv.DictReader(fileobj, restkey="_rest")
+            reader = csv.DictReader(fileobj, restkey="_rest", encoding='utf-8')
             self.assertEqual(reader.fieldnames, ["f1", "f2"])
             self.assertEqual(next(reader), {"f1": '1', "f2": '2',
                                              "_rest": ["abc", "4", "5", "6"]})
@@ -764,7 +769,8 @@ class TestDictFields(unittest.TestCase):
             fileobj.seek(0)
             reader = csv.DictReader(fileobj,
                                     fieldnames="1 2 3 4 5 6".split(),
-                                    restval="DEFAULT")
+                                    restval="DEFAULT",
+                                    encoding='utf-8')
             self.assertEqual(next(reader), {"1": '1', "2": '2', "3": 'abc',
                                              "4": '4', "5": '5', "6": '6'})
             self.assertEqual(next(reader), {"1": '1', "2": '2', "3": 'abc',
@@ -782,7 +788,8 @@ class TestDictFields(unittest.TestCase):
             ]
 
         reader = csv.DictReader(sample,
-                                fieldnames="i1 float i2 s1 s2".split())
+                                fieldnames="i1 float i2 s1 s2".split(),
+                                encoding='utf-8')
         self.assertEqual(next(reader), {"i1": '2147483648',
                                          "float": '43.0e12',
                                          "i2": '17',
@@ -792,7 +799,8 @@ class TestDictFields(unittest.TestCase):
     def test_read_with_blanks(self):
         reader = csv.DictReader([b"1,2,abc,4,5,6\r\n", b"\r\n",
                                  b"1,2,abc,4,5,6\r\n"],
-                                fieldnames="1 2 3 4 5 6".split())
+                                fieldnames="1 2 3 4 5 6".split(),
+                                encoding='utf-8')
         self.assertEqual(next(reader), {"1": '1', "2": '2', "3": 'abc',
                                          "4": '4', "5": '5', "6": '6'})
         self.assertEqual(next(reader), {"1": '1', "2": '2', "3": 'abc',
@@ -801,7 +809,8 @@ class TestDictFields(unittest.TestCase):
     def test_read_semi_sep(self):
         reader = csv.DictReader([b"1;2;abc;4;5;6\r\n"],
                                 fieldnames="1 2 3 4 5 6".split(),
-                                delimiter=';')
+                                delimiter=';',
+                                encoding='utf-8')
         self.assertEqual(next(reader), {"1": '1', "2": '2', "3": 'abc',
                                          "4": '4', "5": '5', "6": '6'})
 
@@ -816,7 +825,7 @@ class TestArrayWrites(unittest.TestCase):
         fd, name = tempfile.mkstemp()
         fileobj = os.fdopen(fd, "w+b")
         try:
-            writer = csv.writer(fileobj, dialect="excel")
+            writer = csv.writer(fileobj, dialect="excel", encoding='utf-8')
             writer.writerow(a)
             expected = b",".join([str(i).encode('utf-8') for i in a])+b"\r\n"
             fileobj.seek(0)
@@ -831,7 +840,7 @@ class TestArrayWrites(unittest.TestCase):
         fd, name = tempfile.mkstemp()
         fileobj = os.fdopen(fd, "w+b")
         try:
-            writer = csv.writer(fileobj, dialect="excel")
+            writer = csv.writer(fileobj, dialect="excel", encoding='utf-8')
             writer.writerow(a)
             float_repr = str
             if sys.version_info >= (2, 7, 3):
@@ -849,7 +858,7 @@ class TestArrayWrites(unittest.TestCase):
         fd, name = tempfile.mkstemp()
         fileobj = os.fdopen(fd, "w+b")
         try:
-            writer = csv.writer(fileobj, dialect="excel")
+            writer = csv.writer(fileobj, dialect="excel", encoding='utf-8')
             writer.writerow(a)
             float_repr = str
             if sys.version_info >= (2, 7, 3):
@@ -866,7 +875,7 @@ class TestArrayWrites(unittest.TestCase):
         fd, name = tempfile.mkstemp()
         fileobj = os.fdopen(fd, "w+b")
         try:
-            writer = csv.writer(fileobj, dialect="excel")
+            writer = csv.writer(fileobj, dialect="excel", encoding='utf-8')
             writer.writerow(a)
             expected = ",".join(a).encode('utf-8')+b"\r\n"
             fileobj.seek(0)
@@ -917,3 +926,28 @@ class TestUnicodeErrors(unittest.TestCase):
                            data_encoding='iso-8859-1')
         reader = csv.DictReader(file, encoding='ascii', errors='ignore')
         self.assertEqual(list(reader)[0]['name'], 'Lwis')
+
+
+class TestPython3Fallback(unittest.TestCase):
+    """Fall back to the built-in version when no encoding is given in Python 3."""
+    if sys.version_info[0] == 2:
+        import unicodecsv as _csv
+    else:
+        import csv as _csv
+
+    def test_reader_fallback(self):
+        f = ['a', 'b', 'c']
+        self.assertEqual(type(csv.reader(f)), type(self._csv.reader(f)))
+
+    def test_writer_fallback(self):
+        f = TextIOWrapper(BytesIO())
+        self.assertEqual(type(csv.writer(f)), type(self._csv.writer(f)))
+
+    def test_dictreader_fallback(self):
+        f = ['a', 'b', 'c']
+        self.assertEqual(type(csv.DictReader(f).reader), type(self._csv.reader(f)))
+
+    def test_dictwriter_fallback(self):
+        f = TextIOWrapper(BytesIO())
+        actual = type(csv.DictWriter(f, fieldnames=['a', 'b', 'c']).writer)
+        self.assertEqual(actual, type(self._csv.writer(f)))

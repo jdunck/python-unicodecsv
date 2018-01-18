@@ -3,6 +3,7 @@ import csv
 import numbers
 
 from itertools import izip
+from string import uppercase
 
 pass_throughs = [
     'register_dialect',
@@ -60,6 +61,27 @@ def _unicodify(s, encoding):
     return s
 
 
+def _get_column_name(column):
+    """
+    >>> _get_column_name(1)
+    'A'
+    >>> _get_column_name(42)
+    'AP'
+    >>> _get_column_name(649)
+    'XY'
+    >>> _get_column_name(26)
+    'Z'
+    >>> _get_column_name(27)
+    'AA'
+    """
+    letters_count = len(uppercase)
+    name = []
+    while column:
+        column, remainder = divmod(column-1, letters_count)
+        name.append(uppercase[remainder])
+    return ''.join(reversed(name))
+
+
 class UnicodeWriter(object):
     """
     >>> import unicodecsv
@@ -112,20 +134,28 @@ class UnicodeReader(object):
         self.encoding_errors = errors
         self._parse_numerics = bool(
             self.dialect.quoting & csv.QUOTE_NONNUMERIC)
+        self._current_row_number = 0
 
     def next(self):
+        self._current_row_number += 1
         row = self.reader.next()
         encoding = self.encoding
         encoding_errors = self.encoding_errors
-        unicode_ = unicode
-        if self._parse_numerics:
-            float_ = float
-            return [(value if isinstance(value, float_) else
-                    unicode_(value, encoding, encoding_errors))
-                    for value in row]
-        else:
-            return [unicode_(value, encoding, encoding_errors)
-                    for value in row]
+        parse_numerics = self._parse_numerics
+        values = []
+        try:
+            for column, value in enumerate(row, start=1):
+                values.append(
+                    value
+                    if parse_numerics and isinstance(value, float) else
+                    unicode(value, encoding, encoding_errors)
+                )
+        except UnicodeDecodeError as error:
+            error.message = 'Value in cell {}{} can not be decoded. {}'.format(
+                _get_column_name(column), self._current_row_number, str(error)
+            )
+            raise error
+        return values
 
     def __iter__(self):
         return self

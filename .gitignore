@@ -1,6 +1,6 @@
 .DS_Store
 .tox
-unittest2*.egg
+unittest*.egg
 *.pyc
 .directory
 venv/

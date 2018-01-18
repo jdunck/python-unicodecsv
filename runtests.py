@@ -1,5 +1,5 @@
 import sys
-import unittest2
+import unittest
 import doctest
 
 def get_suite():
@@ -8,7 +8,7 @@ def get_suite():
     else:
         start_module = 'unicodecsv.py2'
 
-    loader = unittest2.TestLoader()
+    loader = unittest.TestLoader()
     suite = loader.discover(start_module)
     suite.addTest(doctest.DocTestSuite(start_module))
     suite.addTest(doctest.DocFileSuite('README.rst', optionflags=doctest.ELLIPSIS))
@@ -16,7 +16,7 @@ def get_suite():
     return suite
 
 def main():
-    result = unittest2.TestResult()
+    result = unittest.TestResult()
     get_suite().run(result)
     for error in result.errors:
         print(error)

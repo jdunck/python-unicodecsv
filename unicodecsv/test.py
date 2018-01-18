@@ -8,7 +8,7 @@ import os
 import string
 import sys
 import tempfile
-import unittest2 as unittest
+import unittest
 from codecs import EncodedFile
 from io import BytesIO
 

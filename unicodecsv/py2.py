@@ -214,8 +214,10 @@ class DictReader(csv.DictReader):
 
     def next(self):
         row = csv.DictReader.next(self)
-        result = dict((uni_key, row[str_key]) for (str_key, uni_key) in
-                      izip(self.fieldnames, self.unicode_fieldnames))
+        result = {uni_key: row[str_key] for (str_key, uni_key) in
+                      izip(self.fieldnames, self.unicode_fieldnames)}
+
+
         rest = row.get(self.restkey)
         if rest:
             result[self.unicode_restkey] = rest

@@ -104,8 +104,7 @@ class UnicodeReader(object):
                          'skipinitialspace']
 
         if dialect is None:
-            if not any([kwd_name in format_params
-                        for kwd_name in kwds.keys()]):
+            if not any(kwd_name in format_params for kwd_name in kwds.keys()):
                 dialect = csv.excel
         self.reader = csv.reader(f, dialect, **kwds)
         self.encoding = encoding

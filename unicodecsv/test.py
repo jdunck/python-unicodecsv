@@ -85,10 +85,10 @@ class Test_Csv(unittest.TestCase):
 
     def _test_kw_attrs(self, ctor, *args):
         # Now try with alternate options
-        kwargs = dict(delimiter=':', doublequote=False, escapechar='\\',
-                      lineterminator='\r', quotechar='*',
-                      quoting=csv.QUOTE_NONE, skipinitialspace=True,
-                      strict=True)
+        kwargs = {'delimiter': ':', 'doublequote': False, 'escapechar': '\\',
+                  'lineterminator': '\r', 'quotechar': '*',
+                  'quoting': csv.QUOTE_NONE, 'skipinitialspace': True,
+                  'strict': True}
         obj = ctor(*args, **kwargs)
         self.assertEqual(obj.dialect.delimiter, ':')
         self.assertEqual(obj.dialect.doublequote, False)

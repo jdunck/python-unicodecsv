@@ -1,12 +1,22 @@
 sudo: false
 language: python
 python:
-    - "2.6"
     - "2.7"
-    - "3.3"
     - "3.4"
     - "3.5"
+    - "3.6"
+    - "3.7"
+    - "3.8"
     - "pypy"
     - "pypy3"
+arch:
+    - amd64
+    - ppc64le
+jobs:
+  exclude:
+    - arch: ppc64le
+      python: pypy
+    - arch: ppc64le
+      python: pypy3
 install: pip install tox-travis
 script: tox

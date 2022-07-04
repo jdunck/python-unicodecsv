@@ -86,8 +86,9 @@ class UnicodeWriter(object):
                 _stringify_list(row, self.encoding, self.encoding_errors))
 
     def writerows(self, rows):
+        rows = _stringify_list(rows, self.encoding, self.encoding_errors)
         for row in rows:
-            self.writerow(row)
+            self.writer.writerow(row)
 
     @property
     def dialect(self):

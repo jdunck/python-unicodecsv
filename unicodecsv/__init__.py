@@ -7,5 +7,5 @@ if sys.version_info >= (3, 0):
 else:
     from unicodecsv.py2 import *
 
-VERSION = (0, 14, 1)
+VERSION = (0, 14, 2)
 __version__ = ".".join(map(str, VERSION))
